@@ -601,6 +601,16 @@ public final class SemanticAnalysis
             Object funNode = r.dependencies[dependenciesSize-1].node;
             if (funNode instanceof FunDeclarationNode) {
                 FunDeclarationNode funDeclarationNode = (FunDeclarationNode) r.dependencies[dependenciesSize-1].node;
+
+                List<TemplateTypeDeclarationNode> template_params = funDeclarationNode.templateParameters;
+                List<TypeNode> template_arguments = node.template_arguments;
+
+                // Checking provided number of template args
+                if (template_params !=null && template_arguments != null && template_params.size() != template_arguments.size()) {
+                    r.errorFor(format("wrong number of template arguments, expected %d but got %d",
+                        template_params.size(), template_arguments.size()), node);
+                }
+
                 funDeclarationNode.setTemplateParametersValue(node.template_arguments);
             }
 

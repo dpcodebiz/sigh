@@ -208,6 +208,10 @@ public class FunDeclarationNode extends DeclarationNode
         int index = 0;
         for (TypeNode templateArg : templateArgs) {
 
+            if (index >= templateParameters.size()) {
+                break;
+            }
+
             templateParameters.get(index).value = templateArg.getType();
 
             index++;

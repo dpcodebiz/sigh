@@ -57,7 +57,7 @@ public final class BaseTest
         }
 
         // Interpreting
-        //interpret(result, reactor);
+        interpret(result, reactor);
     }
 
     public static void interpret(ParseResult result, Reactor reactor) {

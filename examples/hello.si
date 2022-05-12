@@ -1,6 +1,10 @@
-template<R,T1,T2>
-fun sum(a:T1, b:T1):R {
+template<T1, T2>
+fun sum(a:T1, b:T2):T1 {
     return a + b
 }
 
-var result:Int = sum<Int, Int, Int>(5, 5)
+var result:Int = sum<Int, Int>(5, 5)
+var result2:String = sum<String, String>("Hello", " world!")
+
+print("" + result)
+print("" + result2)
