@@ -199,6 +199,8 @@ public final class SemanticAnalysis
 
             if (n instanceof ReturnNode) {
                 referencesToCheck.add(((ReturnNode) n).expression);
+
+                continue;
             }
 
             // BinaryExpressionNode
@@ -678,6 +680,10 @@ public final class SemanticAnalysis
 
     private void binaryArithmetic (Rule r, BinaryExpressionNode node, Type left, Type right)
     {
+        // Needed in order to be able to process the binary arithmetic properly
+        if (left instanceof TemplateType) left = ((TemplateType) left).getTemplateTypeReference();
+        if (right instanceof TemplateType) right = ((TemplateType) right).getTemplateTypeReference();
+
         if (left instanceof IntType)
             if (right instanceof IntType)
                 r.set(0, IntType.INSTANCE);
@@ -690,7 +696,9 @@ public final class SemanticAnalysis
                 r.set(0, FloatType.INSTANCE);
             else
                 r.error(arithmeticError(node, "Float", right), node);
-        else
+        else if (left instanceof TemplateType) {
+            r.set(0, TemplateType.class);
+        } else
             r.error(arithmeticError(node, left, right), node);
     }
 
@@ -1181,11 +1189,19 @@ public final class SemanticAnalysis
             R.rule()
             .using(function.returnType.attr("value"), node.expression.attr("type"))
             .by(r -> {
+
                 Type formal = r.get(0);
                 Type actual = r.get(1);
+
+                // Needed in order to ensure that we can declare a return statement with a template type without
+                // having to call the function (template <A,B> fun(a:Int):A { return a })
+                formal = formal instanceof TemplateType ? ((TemplateType) formal).getTemplateTypeReference() : formal;
+
                 if (formal instanceof VoidType)
                     r.error("Return with value in a Void function.", node);
                 else if (check) { // Assignment can only be checked whilst walking
+                    return;
+                } else if (formal instanceof TemplateType) { // Allowing (template <A,B> fun(a:Int):A { return a })
                     return;
                 } else if (!isAssignableTo(actual, formal)) {
                     r.errorFor(format(

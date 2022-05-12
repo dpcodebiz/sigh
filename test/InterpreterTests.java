@@ -361,6 +361,7 @@ public final class InterpreterTests extends TestFixture {
 
     @Test
     public void testSimpleTemplateDeclarations () {
+        // OK
         rule = grammar.root;
 
         // No template parameters usage
@@ -378,12 +379,11 @@ public final class InterpreterTests extends TestFixture {
         );
 
         // Template return
-        // TODO fix this not passing currently
-        /*check(
+        check(
             "template<A, B>" +
                 "fun add (a: Int, b: Int): A { return a + b } ",
             null
-        );*/
+        );
 
         // All
         check(
@@ -422,8 +422,8 @@ public final class InterpreterTests extends TestFixture {
 
     @Test
     public void TestSimpleTemplateCalls () {
+        // OK
         rule = grammar.root;
-
 
         // No template parameters usage
         check(
@@ -434,38 +434,35 @@ public final class InterpreterTests extends TestFixture {
         );
 
         // Template params
-        // TODO fix should not reach here
-        /*check(
+        check(
             "template<A, B>" +
                 "fun add (a: A, b: B): Int { return a + b };" +
                 "return add<Int, Int>(1,1)",
             2L
-        );*/
+        );
 
         // Template return
-        // TODO fix above first in templatedeclarations
-        /*check(
+        check(
             "template<A, B>" +
                 "fun add (a: Int, b: Int): A { return a + b } ",
             null
-        );*/
+        );
 
         // All
-        // TODO fix should not reach here
-/*        check(
+        check(
             "template<A, B>" +
                 "fun add (a: A, b: A): B { return a + b };" +
                 "return add<Int, Int>(1, 1)",
             2L
-        );*/
+        );
     }
 
     @Test
     public void TestSimpleTypesTemplateCalls() {
+        // OK
         rule = grammar.root;
 
         // Int sum
-        // TODO fix
         check(
             "template<A, B>" +
                 "fun add (a: A, b: B): B { return a + b };" +
@@ -474,7 +471,6 @@ public final class InterpreterTests extends TestFixture {
         );
 
         // String concat
-        // TODO fix
         check(
             "template<A, B>" +
                 "fun add (a: A, b: B): B { return a + b };" +
@@ -483,13 +479,77 @@ public final class InterpreterTests extends TestFixture {
         );
 
         // Float
+        check(
+            "template<A, B>" +
+                "fun add (a: A, b: B): B { return a + b };" +
+                "return add<Float, Float>(1.0, 1.0)",
+            2.0
+        );
+    }
+
+    @Test
+    public void TestComplexCalls() {
+        rule = grammar.root;
+
+        // Int sum
         // TODO fix
         check(
             "template<A, B>" +
                 "fun add (a: A, b: B): B { return a + b };" +
-                "return add<Float, Float>(1.0f, 1.0f)",
-            2.0f
+                "return add<Int[], Int[]>(1, 1)",
+            2L
         );
+    }
+
+    @Test
+    public void TestComplexTemplateDeclarations() {
+        // OK
+        rule = grammar.root;
+
+        // Multiple template declarations
+        check(
+            "template<A, B>" +
+                "fun add (a: A, b: B): B { return a + b };" +
+                "template<A, B>" +
+                "fun add2 (a: A, b: B): B { return a + b};",
+            null
+        );
+
+        // Template declaration inside scope
+        check(
+            "fun test() {" +
+                    "template<A, B>" +
+                    "fun add (a: A, b: B): B { return a + b };" +
+                    "template<A, B>" +
+                    "fun add2 (a: A, b: B): B { return a + b};" +
+                "}",
+            null
+        );
+    }
+
+    @Test
+    public void TestComplexTemplateCalls() {
+        // OK
+        rule = grammar.root;
+
+        // Multiple template declarations + mixed calls
+        check(
+            "template<A, B>" +
+                "fun add (a: A, b: B): B { return a + b };" +
+                "template<A, B>" +
+                "fun add2 (a: A, b: B): B { return a + b};" +
+                "return add<Int, Int>(1, 1) + add2<Int, Int>(1, 1)",
+                4L
+        );
+
+        // Mixing template function return operations
+        check(
+            "template<A, B>" +
+                "fun add (a: A, b: B): B { return a + b };" +
+                "return add<Int, Int>(1, 1) + add<Int, Int>(1, 1) * 2",
+            6L
+        );
+
     }
 
     // NOTE(norswap): Not incredibly complete, but should cover the basics.
