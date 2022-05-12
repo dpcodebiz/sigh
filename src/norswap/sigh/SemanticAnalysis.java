@@ -1,6 +1,7 @@
 package norswap.sigh;
 
 import norswap.sigh.ast.*;
+
 import norswap.sigh.ast.base.TemplateTypeDeclarationNode;
 import norswap.sigh.ast.base.TemplateTypeNode;
 import norswap.sigh.scopes.DeclarationContext;
@@ -21,6 +22,7 @@ import java.util.stream.IntStream;
 
 import static java.lang.String.format;
 import static norswap.sigh.ast.BinaryOperator.*;
+import static norswap.sigh.ast.ArrayOp.*;
 import static norswap.utils.Util.cast;
 import static norswap.utils.Vanilla.forEachIndexed;
 import static norswap.utils.Vanilla.list;
