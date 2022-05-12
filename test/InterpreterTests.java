@@ -570,5 +570,18 @@ public final class InterpreterTests extends TestFixture {
 
     }
 
+    @Test
+    public void TestMultipleCallsInScope() {
+        rule = grammar.root;
+
+        // TODO fix this very important!
+        check(
+            "template<A, B>" +
+                "fun add (a: A, b: B): A { return a + b };" +
+                "return \"The result is : \" + add<Int, Int>(5, 5) + \" for value \" + add<String, String>(\"5\", \" and 5\")",
+            "The result is : 10 for value 5 and 5"
+        );
+    }
+
     // NOTE(norswap): Not incredibly complete, but should cover the basics.
 }
