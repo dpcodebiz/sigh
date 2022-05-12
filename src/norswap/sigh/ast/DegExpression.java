@@ -4,17 +4,17 @@ import norswap.autumn.positions.Span;
 import norswap.utils.Util;
 import java.util.List;
 
-public final class DotPrdExpression extends ExpressionNode
+public final class DegExpression extends ExpressionNode
 {
-    public final ArrayLiteralNode left, right;
-    public final ArrayOp op;
+    public final ExpressionNode left, right;
+    public final ArrayOp2 op;
 
 
-    public DotPrdExpression (Span span, Object left,Object op, Object right) {
+    public DegExpression (Span span, Object left,Object op, Object right) {
         super(span);
-        this.left =  Util.cast(left, ArrayLiteralNode.class);
-        this.op = Util.cast(op, ArrayOp.class);
-        this.right = Util.cast(right, ArrayLiteralNode.class);
+        this.left =  Util.cast(left, ExpressionNode.class);
+        this.op = Util.cast(op, ArrayOp2.class);
+        this.right = Util.cast(right, ExpressionNode.class);
 
     }
 
