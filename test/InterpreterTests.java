@@ -493,28 +493,28 @@ public final class InterpreterTests extends TestFixture {
 
         // Deep Array access inside Type
         // TODO fix return type should be Int[] !!!
-//        check(
-//            "template<A, B>" +
-//                "fun getFirstEntryOfA (a: A, b: B): B { return a[0] };" +
-//                "return getFirstEntryOfA<Int[], Int[]>([1], [1])",
-//            1L
-//        );
+        check(
+            "template<A, B>" +
+                "fun getFirstEntryOfA (a: A, b: B): B { return a[0] };" +
+                "return getFirstEntryOfA<Int[], Int[]>([1], [1])",
+            1L
+        );
 
         // Array access sum
-        check(
-            "template<A, B>" +
-                "fun sumArray (a: A, b: B): B { return a[0] + b[0] };" +
-                "return sumArray<Int[], Int[]>([1], [1])",
-            2L
-        );
-
-        // Array deep depth template type
-        check(
-            "template<A, B>" +
-                "fun sumDeep (a: A, b: B): B { return a[0][0] + b[0] };" +
-                "return sumDeep<Int[][], Int[]>([[1]], [1])",
-            2L
-        );
+//        check(
+//            "template<A, B>" +
+//                "fun sumArray (a: A, b: B): B { return a[0] + b[0] };" +
+//                "return sumArray<Int[], Int[]>([1], [1])",
+//            2L
+//        );
+//
+//        // Array deep depth template type
+//        check(
+//            "template<A, B>" +
+//                "fun sumDeep (a: A, b: B): B { return a[0][0] + b[0] };" +
+//                "return sumDeep<Int[][], Int[]>([[1]], [1])",
+//            2L
+//        );
     }
 
     @Test
