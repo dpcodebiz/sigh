@@ -314,6 +314,55 @@ public final class SemanticAnalysisTests extends UraniumTestFixture
 
     // ---------------------------------------------------------------------------------------------
 
+    @Test
+    public void TestDotProductSimpleLegal() {
+
+        successInput(
+            "return [1, 1] @ [1, 1]"
+        );
+
+        failureInputWith(
+            "return [[1, 1]] @ [1, 1]",
+            "Left handside of a dot product"
+        );
+
+        failureInputWith(
+            "return [1, 1] @ [[1, 1]]",
+            "Right handside of a dot product"
+        );
+
+        failureInputWith(
+            "return 1 @ 1",
+            "Trying to dot_product Int with Int"
+        );
+    }
+
+    @Test
+    public void TestDotProductComplexLegal() {
+
+        successInput(
+            "var a:Int[] = [1, 1]" +
+            "var b:Int[] = [1, 1]" +
+            "return a @ b"
+        );
+
+        successInput(
+            "var a:Int = [1, 1] @ [1, 1];" +
+            "var b:Int = [1, 1] @ [1, 1]" +
+            "return a + b"
+        );
+
+        successInput(
+            "var a:Int = 1;" +
+            "var b:Int = 1;" +
+            "var c:Int[] = [a, a]" +
+            "var d:Int[] = [b, b]" +
+            "return c @ d"
+        );
+    }
+
+    // ---------------------------------------------------------------------------------------------
+
     @Test public void testArrayStructAccess() {
         successInput("return [1][0]");
         successInput("return [1.0][0]");

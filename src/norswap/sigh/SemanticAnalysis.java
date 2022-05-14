@@ -689,6 +689,10 @@ public final class SemanticAnalysis
             Type left  = r.get(0);
             Type right = r.get(1);
 
+            // Needed in order to be able to process the binary arithmetic properly
+            if (left instanceof TemplateType) left = ((TemplateType) left).getTemplateTypeReference();
+            if (right instanceof TemplateType) right = ((TemplateType) right).getTemplateTypeReference();
+
             if (node.operator == ADD && (left instanceof StringType || right instanceof StringType))
                 r.set(0, StringType.INSTANCE);
             else if (isArithmetic(node.operator))
@@ -699,6 +703,8 @@ public final class SemanticAnalysis
                 binaryLogic(r, node, left, right);
             else if (isEquality(node.operator))
                 binaryEquality(r, node, left, right);
+            else if (isArrayArithmetic(node.operator))
+                binaryArrayArithmetic(r, node, left, right);
         }));
     }
 
@@ -720,14 +726,14 @@ public final class SemanticAnalysis
         return op == EQUALITY || op == NOT_EQUALS;
     }
 
+    private boolean isArrayArithmetic (BinaryOperator op) {
+        return op == DOT_PRODUCT;
+    }
+
     // ---------------------------------------------------------------------------------------------
 
     private void binaryArithmetic (Rule r, BinaryExpressionNode node, Type left, Type right)
     {
-        // Needed in order to be able to process the binary arithmetic properly
-        if (left instanceof TemplateType) left = ((TemplateType) left).getTemplateTypeReference();
-        if (right instanceof TemplateType) right = ((TemplateType) right).getTemplateTypeReference();
-
         if (left instanceof IntType)
             if (right instanceof IntType)
                 r.set(0, IntType.INSTANCE);
@@ -789,6 +795,44 @@ public final class SemanticAnalysis
         if (!(right instanceof BoolType))
             r.errorFor("Attempting to perform binary logic on non-boolean type: " + right,
                 node.right);
+    }
+
+    // ---------------------------------------------------------------------------------------------
+
+    private boolean isArrayLegalForDotProduct(ArrayType array) {
+        Type type = array.componentType;
+
+        if (type instanceof IntType || type instanceof FloatType) {
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    private void binaryArrayArithmetic (Rule r, BinaryExpressionNode node, Type left, Type right)
+    {
+        if (left instanceof ArrayType && right instanceof ArrayType) {
+            Type leftType = ((ArrayType) left).componentType;
+            Type rightType = ((ArrayType) right).componentType;
+
+            boolean leftLegal = isArrayLegalForDotProduct((ArrayType) left);
+            boolean rightLegal = isArrayLegalForDotProduct((ArrayType) right);
+
+            if (!leftLegal) {
+                r.error("Left handside of a dot product operator can only be Int[] or Float[]", node);
+            }
+
+            if (!rightLegal) {
+                r.error("Right handside of a dot product operator can only be Int[] or Float[]", node);
+            }
+
+            if (leftLegal && rightLegal) {
+                r.set(0, IntType.INSTANCE);
+            }
+
+        } else {
+            r.error(arithmeticError(node, left, right), node);
+        }
     }
 
     // ---------------------------------------------------------------------------------------------
