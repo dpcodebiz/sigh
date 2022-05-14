@@ -248,9 +248,39 @@ public final class Interpreter
                 return  leftType.isPrimitive() ? left.equals(right) : left == right;
             case NOT_EQUALS:
                 return  leftType.isPrimitive() ? !left.equals(right) : left != right;
+            case DOT_PRODUCT:
+                return dotProductOp(node, (Object[]) left, (Object[]) right);
         }
 
         throw new Error("should not reach here");
+    }
+
+    private Object dotProductOp
+        (BinaryExpressionNode node, Object[] left, Object[] right)
+    {
+        long result = 0;
+
+        if (left.length != right.length) {
+            throw new Error(
+                String.format(
+                    "Trying to dot product an array of size [%d] with an array of size [%d]",
+                    left.length,
+                    right.length
+                    )
+            );
+        }
+
+        long ileft = 0;
+        long iright = 0;
+
+        for (int i = 0; i < left.length; i++) {
+            ileft = ((Number) left[i]).longValue();
+            iright = ((Number) right[i]).longValue();
+
+            result += ileft * iright;
+        }
+
+        return result;
     }
 
     // ---------------------------------------------------------------------------------------------

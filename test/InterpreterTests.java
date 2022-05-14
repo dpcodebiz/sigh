@@ -597,5 +597,46 @@ public final class InterpreterTests extends TestFixture {
             2L
         );
     }
+
+    @Test
+    public void testSimpleDotProduct () {
+        rule = grammar.root;
+
+        check(
+            "return [1, 1] @ [1, 1]",
+            2L
+        );
+
+    }
+
+    @Test
+    public void testDotProductComplex() {
+
+        rule = grammar.root;
+
+        check(
+            "var a:Int[] = [1, 1]" +
+                "var b:Int[] = [1, 1]" +
+                "return a @ b",
+            2L
+        );
+
+        check(
+            "var a:Int = [1, 1] @ [1, 1];" +
+                "var b:Int = [1, 1] @ [1, 1]" +
+                "return a + b",
+            4L
+        );
+
+        check(
+            "var a:Int = 1;" +
+                "var b:Int = 1;" +
+                "var c:Int[] = [a, a]" +
+                "var d:Int[] = [b, b]" +
+                "return c @ d",
+            2L
+        );
+    }
+
     // NOTE(norswap): Not incredibly complete, but should cover the basics.
 }
