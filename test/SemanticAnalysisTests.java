@@ -335,6 +335,8 @@ public final class SemanticAnalysisTests extends UraniumTestFixture
             "return 1 @ 1",
             "Trying to dot_product Int with Int"
         );
+
+        // TODO test empty arrya
     }
 
     @Test
@@ -358,6 +360,52 @@ public final class SemanticAnalysisTests extends UraniumTestFixture
             "var c:Int[] = [a, a]" +
             "var d:Int[] = [b, b]" +
             "return c @ d"
+        );
+    }
+
+    @Test
+    public void testDotProductFloat() {
+        successInput(
+            "var a:Float[] = [1.0, 1.0]" +
+                "var b:Float[] = [1.0, 1.0]" +
+                "return a @ b"
+        );
+
+        successInput(
+            "var a:Float = [1.0, 1.0] @ [1.0, 1.0];" +
+                "var b:Float = [1.0, 1.0] @ [1.0, 1.0]" +
+                "return a + b"
+        );
+
+        successInput(
+            "var a:Float = 1.0;" +
+                "var b:Float = 1.0;" +
+                "var c:Float[] = [a, a]" +
+                "var d:Float[] = [b, b]" +
+                "return c @ d"
+        );
+    }
+
+    @Test
+    public void testDotProductFloatMix() {
+        successInput(
+            "var a:Float[] = [1.0, 1]" +
+                "var b:Float[] = [1.0, 1]" +
+                "return a @ b"
+        );
+
+        successInput(
+            "var a:Float = [1.0, 1.0] @ [1.0, 1];" +
+                "var b:Float = [1.0, 1.0] @ [1.0, 1]" +
+                "return a + b"
+        );
+
+        successInput(
+            "var a:Float = 1.0;" +
+                "var b:Int = 1;" +
+                "var c:Float[] = [a, a]" +
+                "var d:Float[] = [b, b]" +
+                "return c @ d"
         );
     }
 

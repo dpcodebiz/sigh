@@ -248,18 +248,18 @@ public final class Interpreter
                 return  leftType.isPrimitive() ? left.equals(right) : left == right;
             case NOT_EQUALS:
                 return  leftType.isPrimitive() ? !left.equals(right) : left != right;
-            case DOT_PRODUCT:
-                return dotProductOp(node, (Object[]) left, (Object[]) right);
+            case DOT_PRODUCT: {
+                floating = floating || ((ArrayType) leftType).componentType instanceof FloatType || ((ArrayType) rightType).componentType instanceof FloatType;
+                return dotProductOp(node, floating, (Object[]) left, (Object[]) right);
+            }
         }
 
         throw new Error("should not reach here");
     }
 
     private Object dotProductOp
-        (BinaryExpressionNode node, Object[] left, Object[] right)
+        (BinaryExpressionNode node, Boolean floating, Object[] left, Object[] right)
     {
-        long result = 0;
-
         if (left.length != right.length) {
             throw new Error(
                 String.format(
@@ -270,17 +270,35 @@ public final class Interpreter
             );
         }
 
-        long ileft = 0;
-        long iright = 0;
+        if (floating) {
+            double result = 0;
 
-        for (int i = 0; i < left.length; i++) {
-            ileft = ((Number) left[i]).longValue();
-            iright = ((Number) right[i]).longValue();
+            double ileft = 0;
+            double iright = 0;
 
-            result += ileft * iright;
+            for (int i = 0; i < left.length; i++) {
+                ileft = ((Number) left[i]).floatValue();
+                iright = ((Number) right[i]).floatValue();
+
+                result += ileft * iright;
+            }
+
+            return result;
+        } else {
+            long result = 0;
+
+            long ileft = 0;
+            long iright = 0;
+
+            for (int i = 0; i < left.length; i++) {
+                ileft = ((Number) left[i]).longValue();
+                iright = ((Number) right[i]).longValue();
+
+                result += ileft * iright;
+            }
+
+            return result;
         }
-
-        return result;
     }
 
     // ---------------------------------------------------------------------------------------------
