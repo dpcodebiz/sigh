@@ -15,14 +15,12 @@ import norswap.uranium.Reactor;
 import norswap.uranium.Rule;
 import norswap.utils.visitors.ReflectiveFieldWalker;
 import norswap.utils.visitors.Walker;
-import org.w3c.dom.Attr;
 import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 import static java.lang.String.format;
 import static norswap.sigh.ast.BinaryOperator.*;
-import static norswap.sigh.ast.ArrayOp.*;
 import static norswap.utils.Util.cast;
 import static norswap.utils.Vanilla.forEachIndexed;
 import static norswap.utils.Vanilla.list;
@@ -562,8 +560,7 @@ public final class SemanticAnalysis
         // Getting proper function reference
         if (node.function instanceof ReferenceNode) {
             funName = ((ReferenceNode) node.function).name;
-        }
-        if (node.function instanceof ConstructorNode) {
+        } else if (node.function instanceof ConstructorNode) {
             funName = ((ConstructorNode) node.function).ref.name;
         }
 
@@ -609,14 +606,20 @@ public final class SemanticAnalysis
                 if (template_params !=null && template_arguments != null && template_params.size() != template_arguments.size()) {
                     r.errorFor(format("wrong number of template arguments, expected %d but got %d",
                         template_params.size(), template_arguments.size()), node);
+                } else if (template_params != null && template_arguments == null && template_params.size() != 0) {
+                    r.errorFor(format("wrong number of template arguments, expected %d but got %d",
+                        template_params.size(), 0), node);
+                } else {
+                    node.setTemplateTypeReferences(template_arguments, template_params, funType.paramTypes);
                 }
-
-                funDeclarationNode.setTemplateParametersValue(node.template_arguments);
             }
 
             for (int i = 0; i < checkedArgs; ++i) {
                 Type argType = r.get(i + 1);
-                Type paramType = (funType.paramTypes[i] instanceof TemplateType) ? (((TemplateType) funType.paramTypes[i]).node.value) : funType.paramTypes[i];
+                Type paramType =
+                    (funType.paramTypes[i] instanceof TemplateType)
+                        ? node.templateTypeReferences.get(i).value
+                        : funType.paramTypes[i];
                 if (!isAssignableTo(argType, paramType)) {
                     if (funType.paramTypes[i] instanceof TemplateType) {
                         if (paramType == null) {
@@ -666,6 +669,13 @@ public final class SemanticAnalysis
     {
         // Checking if any template parameters involved here
         boolean check = involvesUninitializedTemplateParameter(node, scope);
+
+        Scope s = scope;
+
+        R.rule(node, "scope")
+        .by(rule -> {
+            rule.set(0, s);
+        });
 
         R.rule(node, "type")
         .using(node.left.attr("type"), node.right.attr("type"))
@@ -734,15 +744,6 @@ public final class SemanticAnalysis
             r.set(0, TemplateType.class);
         } else
             r.error(arithmeticError(node, left, right), node);
-    }
-
-    private void dotprod (Rule r, DotPrdExpression node)
-    {
-        int ll = node.left.components.size();
-        int lr = node.right.components.size();
-        if(ll==0 || lr ==0)
-            r.error("Arrays can not be empty",node);
-
     }
 
     // ---------------------------------------------------------------------------------------------

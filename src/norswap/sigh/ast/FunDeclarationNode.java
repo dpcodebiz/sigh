@@ -193,47 +193,6 @@ public class FunDeclarationNode extends DeclarationNode
     }
 
     /**
-     * Assigns a type to each template parameter
-     * @param templateArgs
-     */
-    public void setTemplateParametersValue(List<TypeNode> templateArgs) {
-
-        // Clearing up template parameters
-        clearTemplateParametersValue();
-
-        // Skip if no template args
-        if (templateArgs == null) return;
-
-        // Assigning the type to each template parameter
-        int index = 0;
-        for (TypeNode templateArg : templateArgs) {
-
-            if (index >= templateParameters.size()) {
-                break;
-            }
-
-            templateParameters.get(index).value = templateArg.getType();
-
-            index++;
-        }
-
-        return;
-    }
-
-    /**
-     * Clears all types assigned to template parameters
-     */
-    public void clearTemplateParametersValue() {
-
-        // Resetting type to null
-        templateParameters.forEach($ -> {
-            $.value = null;
-        });
-
-        return;
-    }
-
-    /**
      * Returns the type inferred for the given template parameter on a potential function call
      * @param templateParameter
      * @param templateArguments

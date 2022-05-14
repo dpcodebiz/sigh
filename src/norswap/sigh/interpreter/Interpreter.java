@@ -1,15 +1,15 @@
 package norswap.sigh.interpreter;
 
 import norswap.sigh.ast.*;
+import norswap.sigh.ast.base.TemplateTypeDeclarationNode;
+import norswap.sigh.ast.base.TemplateTypeNode;
+import norswap.sigh.ast.base.TemplateTypeReference;
+import norswap.sigh.scopes.DeclarationContext;
 import norswap.sigh.scopes.DeclarationKind;
 import norswap.sigh.scopes.RootScope;
 import norswap.sigh.scopes.Scope;
 import norswap.sigh.scopes.SyntheticDeclarationNode;
-import norswap.sigh.types.FloatType;
-import norswap.sigh.types.IntType;
-import norswap.sigh.types.StringType;
-import norswap.sigh.types.TemplateType;
-import norswap.sigh.types.Type;
+import norswap.sigh.types.*;
 import norswap.uranium.Attribute;
 import norswap.uranium.Reactor;
 import norswap.utils.Util;
@@ -181,33 +181,47 @@ public final class Interpreter
 
         // Needed in order to be able to process the binary arithmetic properly
         if (leftType instanceof TemplateType) {
-            if (node.left instanceof ArrayAccessNode) {
-                SighNode iterator = node.left;
-                int depth = 0;
 
-                while (iterator instanceof ArrayAccessNode) {
-                    iterator = ((ArrayAccessNode) iterator).array;
-                    depth++;
+            Type type;
+
+            if (this.storage.parent == null) {
+                type = leftType;
+            } else {
+
+                TypeNode tn = (TypeNode) this.storage.parent.get(this.storage.parent.scope, ((TemplateType) leftType).node.name);
+                type = tn.getType();
+
+                if (node.left instanceof ArrayAccessNode) {
+                    type = ((TemplateType) leftType).getTemplateTypeAccess((ArrayAccessNode) node.left, (ArrayType) type);
                 }
-
-                leftType = ((TemplateType) leftType).getTemplateTypeAccessReference(depth);
             }
-            else leftType = ((TemplateType) leftType).getTemplateTypeReference();
+
+            if (node.left instanceof FunCallNode) {
+                type = ((FunCallNode) node.left).getReturnType(storage.scope);
+            }
+
+            leftType = type;
         }
 
         if (rightType instanceof TemplateType) {
-            if (node.right instanceof ArrayAccessNode) {
-                SighNode iterator = node.right;
-                int depth = 0;
+            Type type;
 
-                while (iterator instanceof ArrayAccessNode) {
-                    iterator = ((ArrayAccessNode) iterator).array;
-                    depth++;
+            if (this.storage.parent == null) {
+                type = leftType;
+            } else {
+                TypeNode tn = (TypeNode) this.storage.parent.get(this.storage.parent.scope, ((TemplateType) rightType).node.name);
+                type = tn.getType();
+
+                if (node.right instanceof ArrayAccessNode) {
+                    type = ((TemplateType) rightType).getTemplateTypeAccess((ArrayAccessNode) node.right, (ArrayType) type);
                 }
-
-                rightType = ((TemplateType) rightType).getTemplateTypeAccessReference(depth);
             }
-            else rightType = ((TemplateType) rightType).getTemplateTypeReference();
+
+            if (node.right instanceof FunCallNode) {
+                type = ((FunCallNode) node.right).getReturnType(storage.scope);
+            }
+
+            rightType = type;
         }
 
         // Cases where both operands should not be evaluated.
@@ -470,11 +484,49 @@ public final class Interpreter
         //Scope scope = reactor.get(decl, "scope");
         Scope scope = (Scope) getAttr(decl, "scope", Scope.class);
 
+        // Inferring types for template types here
+//        for (ParameterNode parameterNode : ((FunDeclarationNode) decl).parameters) {
+//
+//            // Getting context to redeclare the variable
+//            if (parameterNode.type instanceof TemplateTypeNode) {
+//                DeclarationNode declarationNode = scope.lookupLocal(parameterNode.name);
+//
+//                if (declarationNode != null) {
+//
+//                    String templateParamName = ((TemplateTypeNode) ((ParameterNode) declarationNode).type).name;
+//                    TemplateTypeReference reference = node
+//                        .templateTypeReferences
+//                        .stream()
+//                        .filter(templateTypeReference -> templateTypeReference.declarationNode.name.equals(templateParamName)
+//                        )
+//                        .findAny()
+//                        .get();
+//
+//                    if (reference != null) {
+//                        TemplateTypeDeclarationNode newDecl = new TemplateTypeDeclarationNode(declarationNode.span, templateParamName);
+//                        newDecl.value = reference.value;
+//                        scope.declare(parameterNode.name, newDecl);
+//                    } else {
+//                        // ease further debug process in case this happens
+//                        throw new AssertionError("An error occurred when trying to infer the template parameter declarations for function call "+node.contents());
+//                    }
+//
+//                }
+//
+//            }
+//
+//        }
         storage = new ScopeStorage(scope, storage);
 
         FunDeclarationNode funDecl = (FunDeclarationNode) decl;
         coIterate(args, funDecl.parameters,
                 (arg, param) -> storage.set(scope, param.name, arg));
+
+        if (node.template_arguments != null) {
+            coIterate(node.template_arguments, node.templateTypeReferences,
+                (arg, param) -> storage.set(scope, param.declarationNode.name, arg));
+        }
+
 
         try {
             get(funDecl.block);

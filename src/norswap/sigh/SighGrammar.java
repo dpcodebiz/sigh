@@ -193,9 +193,6 @@ public class SighGrammar extends Grammar
         LANGLE      .as_val(BinaryOperator.LOWER),
         RANGLE      .as_val(BinaryOperator.GREATER));
 
-    public rule dot_at = choice(AT.as_val(ArrayOp.DOTP));
-
-    public rule deg = choice(DEG.as_val((ArrayOp2.DEGG)));
     public rule mult_expr = left_expression()
         .operand(prefix_expression)
         .infix(mult_op,
@@ -228,14 +225,6 @@ public class SighGrammar extends Grammar
 
     public rule expression = seq(assignment_expression);
 
-
-    public rule dot_prod_expr = left_expression()
-        .operand(array)
-        .infix(dot_at,$ -> new DotPrdExpression($.span(), $.$[0], $.$[1], $.$[2]));
-
-    public rule deg_expr = left_expression()
-        .operand(basic_expression)
-        .infix(deg,$ -> new DegExpression($.span(), $.$[0], $.$[1], $.$[2]));
     public rule expression_stmt =
         expression
         .filter($ -> {
