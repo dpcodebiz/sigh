@@ -9,6 +9,8 @@ import norswap.utils.visitors.Walker;
 import org.testng.annotations.Test;
 
 import static java.util.Arrays.asList;
+import static norswap.sigh.ast.BinaryOperator.DIVIDE;
+import static norswap.sigh.ast.BinaryOperator.MULTIPLY;
 
 /**
  * NOTE(norswap): These tests were derived from the {@link InterpreterTests} and don't test anything
@@ -410,6 +412,15 @@ public final class SemanticAnalysisTests extends UraniumTestFixture
                 "var d:Float[] = [b, b]" +
                 "return c @ d"
         );
+
+        // TODO add str failure
+    }
+
+    @Test
+    public void testArrayScalarProduct() {
+        successInput("return 2 * [1, 1]");
+        successInput("return 2 / [1, 1]");
+        failureInput("return \"test\" * [1, 1]");
     }
 
     // ---------------------------------------------------------------------------------------------
