@@ -314,6 +314,106 @@ public final class SemanticAnalysisTests extends UraniumTestFixture
 
     // ---------------------------------------------------------------------------------------------
 
+    @Test
+    public void TestDotProductSimpleLegal() {
+
+        successInput(
+            "return [1, 1] @ [1, 1]"
+        );
+
+        failureInputWith(
+            "return [[1, 1]] @ [1, 1]",
+            "Left handside of a dot product"
+        );
+
+        failureInputWith(
+            "return [1, 1] @ [[1, 1]]",
+            "Right handside of a dot product"
+        );
+
+        failureInputWith(
+            "return 1 @ 1",
+            "Trying to dot_product Int with Int"
+        );
+
+        failureInputWith(
+            "return [] @ []",
+            "Trying to dot_product with empty arrays"
+        );
+    }
+
+    @Test
+    public void TestDotProductComplexLegal() {
+
+        successInput(
+            "var a:Int[] = [1, 1]" +
+            "var b:Int[] = [1, 1]" +
+            "return a @ b"
+        );
+
+        successInput(
+            "var a:Int = [1, 1] @ [1, 1];" +
+            "var b:Int = [1, 1] @ [1, 1]" +
+            "return a + b"
+        );
+
+        successInput(
+            "var a:Int = 1;" +
+            "var b:Int = 1;" +
+            "var c:Int[] = [a, a]" +
+            "var d:Int[] = [b, b]" +
+            "return c @ d"
+        );
+    }
+
+    @Test
+    public void testDotProductFloat() {
+        successInput(
+            "var a:Float[] = [1.0, 1.0]" +
+                "var b:Float[] = [1.0, 1.0]" +
+                "return a @ b"
+        );
+
+        successInput(
+            "var a:Float = [1.0, 1.0] @ [1.0, 1.0];" +
+                "var b:Float = [1.0, 1.0] @ [1.0, 1.0]" +
+                "return a + b"
+        );
+
+        successInput(
+            "var a:Float = 1.0;" +
+                "var b:Float = 1.0;" +
+                "var c:Float[] = [a, a]" +
+                "var d:Float[] = [b, b]" +
+                "return c @ d"
+        );
+    }
+
+    @Test
+    public void testDotProductFloatMix() {
+        successInput(
+            "var a:Float[] = [1.0, 1]" +
+                "var b:Float[] = [1.0, 1]" +
+                "return a @ b"
+        );
+
+        successInput(
+            "var a:Float = [1.0, 1.0] @ [1.0, 1];" +
+                "var b:Float = [1.0, 1.0] @ [1.0, 1]" +
+                "return a + b"
+        );
+
+        successInput(
+            "var a:Float = 1.0;" +
+                "var b:Int = 1;" +
+                "var c:Float[] = [a, a]" +
+                "var d:Float[] = [b, b]" +
+                "return c @ d"
+        );
+    }
+
+    // ---------------------------------------------------------------------------------------------
+
     @Test public void testArrayStructAccess() {
         successInput("return [1][0]");
         successInput("return [1.0][0]");

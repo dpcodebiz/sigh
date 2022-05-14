@@ -335,6 +335,23 @@ public class GrammarTests extends AutumnTestFixture {
         );
     }
 
+    @Test
+    public void testDotProduct() {
+        rule = grammar.expression;
+
+        // Int array
+        successExpect("[1, 1] @ [1, 1]",
+            new BinaryExpressionNode(
+                null,
+                new ArrayLiteralNode(null, asList(intlit(1), intlit(1))),
+                DOT_PRODUCT,
+                new ArrayLiteralNode(null, asList(intlit(1), intlit(1)))
+            )
+        );
+
+        //failure("1 @ 1");
+    }
+
     @Test public void testTupleVarDeclaration() {
         rule = grammar.statement;
 

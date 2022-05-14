@@ -193,8 +193,17 @@ public class SighGrammar extends Grammar
         LANGLE      .as_val(BinaryOperator.LOWER),
         RANGLE      .as_val(BinaryOperator.GREATER));
 
-    public rule mult_expr = left_expression()
+    public rule dot_product_op = choice(
+        AT     .as_val(BinaryOperator.DOT_PRODUCT)
+    );
+
+    public rule dot_product_expr = left_expression()
         .operand(prefix_expression)
+        .infix(dot_product_op,
+            $ -> new BinaryExpressionNode($.span(), $.$[0], $.$[1], $.$[2]));
+
+    public rule mult_expr = left_expression()
+        .operand(dot_product_expr)
         .infix(mult_op,
             $ -> new BinaryExpressionNode($.span(), $.$[0], $.$[1], $.$[2]));
 

@@ -597,5 +597,110 @@ public final class InterpreterTests extends TestFixture {
             2L
         );
     }
+
+    @Test
+    public void testSimpleDotProduct () {
+        rule = grammar.root;
+
+        check(
+            "return [1, 1] @ [1, 1]",
+            2L
+        );
+
+        // TODO empty
+        checkThrows(
+            "return [] @ []",
+            AssertionError.class
+        );
+
+    }
+
+    @Test
+    public void testDotProductComplex() {
+
+        rule = grammar.root;
+
+        check(
+            "var a:Int[] = [1, 1]" +
+                "var b:Int[] = [1, 1]" +
+                "return a @ b",
+            2L
+        );
+
+        check(
+            "var a:Int = [1, 1] @ [1, 1];" +
+                "var b:Int = [1, 1] @ [1, 1]" +
+                "return a + b",
+            4L
+        );
+
+        check(
+            "var a:Int = 1;" +
+                "var b:Int = 1;" +
+                "var c:Int[] = [a, a]" +
+                "var d:Int[] = [b, b]" +
+                "return c @ d",
+            2L
+        );
+    }
+
+    @Test
+    public void testDotProductFloat() {
+
+        rule = grammar.root;
+
+        check(
+            "var a:Float[] = [1.0, 1.0]" +
+                "var b:Float[] = [1.0, 1.0]" +
+                "return a @ b",
+            2.0d
+        );
+
+        check(
+            "var a:Float = [1.0, 1.0] @ [1.0, 1.0];" +
+                "var b:Float = [1.0, 1.0] @ [1.0, 1.0]" +
+                "return a + b",
+            4.0d
+        );
+
+        check(
+            "var a:Float = 1.0;" +
+                "var b:Float = 1.0;" +
+                "var c:Float[] = [a, a]" +
+                "var d:Float[] = [b, b]" +
+                "return c @ d",
+            2.0d
+        );
+    }
+
+    @Test
+    public void testDotProductFloatMix() {
+
+        rule = grammar.root;
+
+        check(
+            "var a:Float[] = [1.0, 1]" +
+                "var b:Int[] = [1, 1]" +
+                "return a @ b",
+            2.0d
+        );
+
+        check(
+            "var a:Float = [1.0, 1.0] @ [1.0, 1];" +
+                "var b:Float = [1.0, 1.0] @ [1, 1]" +
+                "return a + b",
+            4.0d
+        );
+
+        check(
+            "var a:Float = 1.0;" +
+                "var b:Int = 1;" +
+                "var c:Float[] = [a, a]" +
+                "var d:Float[] = [b, b]" +
+                "return c @ d",
+            2.0d
+        );
+    }
+
     // NOTE(norswap): Not incredibly complete, but should cover the basics.
 }
