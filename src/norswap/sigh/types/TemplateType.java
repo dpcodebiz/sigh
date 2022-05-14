@@ -1,7 +1,10 @@
 package norswap.sigh.types;
 
 import norswap.sigh.ast.ArrayAccessNode;
+import norswap.sigh.ast.SighNode;
 import norswap.sigh.ast.base.TemplateTypeDeclarationNode;
+import norswap.sigh.scopes.Scope;
+import norswap.uranium.Reactor;
 
 public final class TemplateType extends Type
 {
@@ -23,11 +26,38 @@ public final class TemplateType extends Type
         return node.hashCode();
     }
 
+    public Type getTemplateTypeReference(Reactor reactor) {
+
+        Scope scope = reactor.get(this, "declared");
+
+        return null;
+    }
+
     public Type getTemplateTypeReference() {
         return this.node.value != null ? this.node.value : this;
     }
 
-    public Type getTemplateTypeAccessReference(int depth) {
+    public Type getTemplateTypeAccess(ArrayAccessNode node, ArrayType arrayType) {
+        SighNode iterator = node;
+        int depth = 0;
+
+        while (iterator instanceof ArrayAccessNode) {
+            iterator = ((ArrayAccessNode) iterator).array;
+            depth++;
+        }
+
+        Type typeIterator = arrayType;
+
+        int currentDepth = 0;
+        while (currentDepth != depth) {
+            typeIterator = ((ArrayType) typeIterator).componentType;
+            currentDepth++;
+        }
+
+        return typeIterator;
+    }
+
+    private Type getTemplateTypeAccessReference(int depth) {
         if (this.node.value != null) {
             Type val = this.node.value;
             if (val instanceof ArrayType) {

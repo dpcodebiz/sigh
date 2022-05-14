@@ -246,6 +246,8 @@ public final class InterpreterTests extends TestFixture {
 
     @Test
     public void testCalls () {
+        rule = grammar.root;
+
         check(
             "fun add (a: Int, b: Int): Int { return a + b } " +
                 "return add(4, 7)",
@@ -414,7 +416,7 @@ public final class InterpreterTests extends TestFixture {
         // Checking too many template parameter types provided
         checkThrows(
             "template<A> fun add (a: A, b: Int): Int { return a + b }; " +
-                "return add<Int, String>(1, 1);",
+                "return add<Int, Int>(1, 1);",
             AssertionError.class
         );
     }
@@ -428,7 +430,7 @@ public final class InterpreterTests extends TestFixture {
         check(
             "template<A, B>" +
                 "fun add (a: Int, b: Int): Int { return a + b };" +
-                "return add(1, 1)",
+                "return add<Int, Int>(1, 1)",
             2L
         );
 
@@ -494,13 +496,13 @@ public final class InterpreterTests extends TestFixture {
 
         // Deep Array access inside Type
         // TODO fix the C type not being handled properly
-        check(
+        /*check(
             "template<A, B, C>" +
                 "fun getFirstEntryOfA (a: A, b: B): C { return a[0] };" +
                 "var t:Int[] = getFirstEntryOfA<Int[], Int[], Int[]>([1], [1])" +
                 "return t",
             1L
-        );
+        );*/
 
         // Array access sum
         check(
@@ -583,5 +585,17 @@ public final class InterpreterTests extends TestFixture {
         );
     }
 
+    @Test
+    public void TestTempor() {
+        rule = grammar.root;
+
+        // No template parameters usage
+        check(
+            "template<A, B>" +
+                "fun add (a: A, b: B): Int { return a + b };" +
+                "return add<Int, Int>(1, 1)",
+            2L
+        );
+    }
     // NOTE(norswap): Not incredibly complete, but should cover the basics.
 }

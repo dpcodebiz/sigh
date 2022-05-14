@@ -606,10 +606,12 @@ public final class SemanticAnalysis
                 if (template_params !=null && template_arguments != null && template_params.size() != template_arguments.size()) {
                     r.errorFor(format("wrong number of template arguments, expected %d but got %d",
                         template_params.size(), template_arguments.size()), node);
+                } else if (template_params != null && template_arguments == null && template_params.size() != 0) {
+                    r.errorFor(format("wrong number of template arguments, expected %d but got %d",
+                        template_params.size(), 0), node);
+                } else {
+                    node.setTemplateTypeReferences(template_arguments, template_params, funType.paramTypes);
                 }
-
-                node.setTemplateTypeReferences(node.template_arguments, template_params, funType.paramTypes);
-                //funDeclarationNode.setTemplateParametersValue(node.template_arguments);
             }
 
             for (int i = 0; i < checkedArgs; ++i) {
@@ -667,6 +669,13 @@ public final class SemanticAnalysis
     {
         // Checking if any template parameters involved here
         boolean check = involvesUninitializedTemplateParameter(node, scope);
+
+        Scope s = scope;
+
+        R.rule(node, "scope")
+        .by(rule -> {
+            rule.set(0, s);
+        });
 
         R.rule(node, "type")
         .using(node.left.attr("type"), node.right.attr("type"))

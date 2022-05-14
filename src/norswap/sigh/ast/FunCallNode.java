@@ -2,7 +2,10 @@ package norswap.sigh.ast;
 
 import norswap.autumn.positions.Span;
 import norswap.sigh.ast.base.TemplateTypeDeclarationNode;
+import norswap.sigh.ast.base.TemplateTypeNode;
 import norswap.sigh.ast.base.TemplateTypeReference;
+import norswap.sigh.scopes.Scope;
+import norswap.sigh.types.TemplateType;
 import norswap.sigh.types.Type;
 import norswap.utils.Util;
 import java.util.ArrayList;
@@ -43,6 +46,23 @@ public class FunCallNode extends ExpressionNode
         }
     }
 
+    public Type getReturnType(Scope scope) {
+
+        DeclarationNode decl = scope.lookupLocal(this.function.contents());
+        FunDeclarationNode funDecl = (FunDeclarationNode) decl;
+
+        TypeNode returnTypeNode = ((FunDeclarationNode) decl).returnType;
+        if (((FunDeclarationNode) decl).returnType instanceof TemplateTypeNode) {
+            String returnTypeName = ((TemplateTypeNode) returnTypeNode).name;
+            TemplateTypeReference templateTypeReference = this.templateTypeReferences.stream().filter(templateTypeReference1 -> templateTypeReference1.declarationNode.name.equals(returnTypeName)).findAny().get();
+            Type returnType = templateTypeReference.value;
+
+            return returnType;
+        }
+
+        return null;
+    }
+
     /**
      * Clears all types assigned to template parameters
      */
@@ -68,6 +88,8 @@ public class FunCallNode extends ExpressionNode
         // Assigning the type to each template parameter
         int index = 0;
         for (Type paramType : paramTypes) {
+
+            if (!(paramType instanceof TemplateType)) continue;
 
             TemplateTypeDeclarationNode declarationNode = declarationNodes.stream().filter($ -> $.name.equals(paramType.name())).findFirst().get();
             int templateParameterIndex = declarationNodes.indexOf(declarationNode);
