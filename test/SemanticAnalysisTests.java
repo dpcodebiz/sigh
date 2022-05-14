@@ -303,6 +303,15 @@ public final class SemanticAnalysisTests extends UraniumTestFixture
             "var result:Bool = compare<Int[]>([5], [5])");
     }
 
+    @Test
+    public void TestMultipleCallsInScope() {
+        successInput(
+            "template<A, B>" +
+                "fun add (a: A, b: B): A { return a + b };" +
+                "return \"The result is : \" + add<Int, Int>(5, 5) + \" for value \" + add<String, String>(\"5\", \" and 5\")"
+        );
+    }
+
     // ---------------------------------------------------------------------------------------------
 
     @Test public void testArrayStructAccess() {

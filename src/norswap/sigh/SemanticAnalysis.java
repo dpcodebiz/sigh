@@ -560,8 +560,7 @@ public final class SemanticAnalysis
         // Getting proper function reference
         if (node.function instanceof ReferenceNode) {
             funName = ((ReferenceNode) node.function).name;
-        }
-        if (node.function instanceof ConstructorNode) {
+        } else if (node.function instanceof ConstructorNode) {
             funName = ((ConstructorNode) node.function).ref.name;
         }
 
@@ -609,12 +608,16 @@ public final class SemanticAnalysis
                         template_params.size(), template_arguments.size()), node);
                 }
 
-                funDeclarationNode.setTemplateParametersValue(node.template_arguments);
+                node.setTemplateTypeReferences(node.template_arguments, template_params, funType.paramTypes);
+                //funDeclarationNode.setTemplateParametersValue(node.template_arguments);
             }
 
             for (int i = 0; i < checkedArgs; ++i) {
                 Type argType = r.get(i + 1);
-                Type paramType = (funType.paramTypes[i] instanceof TemplateType) ? (((TemplateType) funType.paramTypes[i]).node.value) : funType.paramTypes[i];
+                Type paramType =
+                    (funType.paramTypes[i] instanceof TemplateType)
+                        ? node.templateTypeReferences.get(i).value
+                        : funType.paramTypes[i];
                 if (!isAssignableTo(argType, paramType)) {
                     if (funType.paramTypes[i] instanceof TemplateType) {
                         if (paramType == null) {
