@@ -15,14 +15,12 @@ import norswap.uranium.Reactor;
 import norswap.uranium.Rule;
 import norswap.utils.visitors.ReflectiveFieldWalker;
 import norswap.utils.visitors.Walker;
-import org.w3c.dom.Attr;
 import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 import static java.lang.String.format;
 import static norswap.sigh.ast.BinaryOperator.*;
-import static norswap.sigh.ast.ArrayOp.*;
 import static norswap.utils.Util.cast;
 import static norswap.utils.Vanilla.forEachIndexed;
 import static norswap.utils.Vanilla.list;
@@ -734,15 +732,6 @@ public final class SemanticAnalysis
             r.set(0, TemplateType.class);
         } else
             r.error(arithmeticError(node, left, right), node);
-    }
-
-    private void dotprod (Rule r, DotPrdExpression node)
-    {
-        int ll = node.left.components.size();
-        int lr = node.right.components.size();
-        if(ll==0 || lr ==0)
-            r.error("Arrays can not be empty",node);
-
     }
 
     // ---------------------------------------------------------------------------------------------

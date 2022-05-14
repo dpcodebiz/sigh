@@ -191,14 +191,6 @@ public final class SemanticAnalysisTests extends UraniumTestFixture
 
     // ---------------------------------------------------------------------------------------------
 
-    @Test public void dotarr () {
-        successInput("return [1,2,3]@[4,5,6]");
-
-    }
-    @Test public void degarr () {
-        successInput("return 5°[4,5,6]");
-
-    }
     @Test public void testCalls() {
         successInput(
             "fun add (a: Int, b: Int): Int { return a + b } " +

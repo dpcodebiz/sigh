@@ -4,12 +4,9 @@ import norswap.sigh.ast.*;
 import norswap.sigh.ast.base.TemplateTypeDeclarationNode;
 import norswap.sigh.ast.base.TemplateTypeNode;
 import norswap.sigh.ast.base.TupleLiteralNode;
-import norswap.sigh.types.IntType;
 import org.testng.annotations.Test;
 
 import static java.util.Arrays.asList;
-import static norswap.sigh.ast.ArrayOp.DOTP;
-import static norswap.sigh.ast.ArrayOp2.DEGG;
 import static norswap.sigh.ast.BinaryOperator.*;
 
 public class GrammarTests extends AutumnTestFixture {
@@ -386,19 +383,5 @@ public class GrammarTests extends AutumnTestFixture {
                 )
             )
         );
-    }
-
-    @Test
-    public void testdotprod2 () {
-        rule = grammar.dot_prod_expr;
-        successExpect("[1,2,4] @ [4,5,6]", new DotPrdExpression(null, new ArrayLiteralNode(null, asList(intlit(1), intlit(2), intlit(3))),DOTP, new ArrayLiteralNode(null, asList(intlit(4), intlit(5), intlit(6)))));
-
-    }
-
-    @Test
-    public void testdeg () {
-        rule = grammar.deg_expr;
-        successExpect("5 ° [4,5,6]", new DegExpression(null,intlit(5),DEGG, new ArrayLiteralNode(null, asList(intlit(4), intlit(5), intlit(6)))));
-
     }
 }
