@@ -348,8 +348,30 @@ public class GrammarTests extends AutumnTestFixture {
                 new ArrayLiteralNode(null, asList(intlit(1), intlit(1)))
             )
         );
+    }
 
-        //failure("1 @ 1");
+    @Test
+    public void testArrayScalarProduct() {
+        rule = grammar.expression;
+
+        successExpect("2 * [1, 1]",
+            new BinaryExpressionNode(
+                null,
+                intlit(2),
+                MULTIPLY,
+                new ArrayLiteralNode(null, asList(intlit(1), intlit(1)))
+            )
+        );
+
+        successExpect("2 / [1, 1]",
+            new BinaryExpressionNode(
+                null,
+                intlit(2),
+                DIVIDE,
+                new ArrayLiteralNode(null, asList(intlit(1), intlit(1)))
+            )
+        );
+
     }
 
     @Test public void testTupleVarDeclaration() {
