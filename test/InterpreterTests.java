@@ -608,9 +608,9 @@ public final class InterpreterTests extends TestFixture {
         );
 
         // TODO empty
-        check(
+        checkThrows(
             "return [] @ []",
-            2L
+            AssertionError.class
         );
 
     }
