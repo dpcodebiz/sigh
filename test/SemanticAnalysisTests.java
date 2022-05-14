@@ -336,7 +336,10 @@ public final class SemanticAnalysisTests extends UraniumTestFixture
             "Trying to dot_product Int with Int"
         );
 
-        // TODO test empty arrya
+        failureInputWith(
+            "return [] @ []",
+            "Trying to dot_product with empty arrays"
+        );
     }
 
     @Test

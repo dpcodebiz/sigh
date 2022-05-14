@@ -13,8 +13,10 @@ import norswap.sigh.types.*;
 import norswap.uranium.Attribute;
 import norswap.uranium.Reactor;
 import norswap.uranium.Rule;
+import norswap.uranium.SemanticError;
 import norswap.utils.visitors.ReflectiveFieldWalker;
 import norswap.utils.visitors.Walker;
+import java.sql.Array;
 import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
@@ -667,6 +669,23 @@ public final class SemanticAnalysis
 
     private void binaryExpression (BinaryExpressionNode node)
     {
+
+        if (node.operator == DOT_PRODUCT) {
+            if (node.left instanceof ArrayLiteralNode) {
+                if (((ArrayLiteralNode) node.left).components.size() == 0) {
+                    R.error(new SemanticError("Trying to dot_product with empty arrays", null, null));
+                    return;
+                }
+            }
+
+            if (node.right instanceof ArrayLiteralNode) {
+                if (((ArrayLiteralNode) node.right).components.size() == 0) {
+                    R.error(new SemanticError("Trying to dot_product with empty arrays", null, null));
+                    return;
+                }
+            }
+        }
+
         // Checking if any template parameters involved here
         boolean check = involvesUninitializedTemplateParameter(node, scope);
 
