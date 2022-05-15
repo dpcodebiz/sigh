@@ -886,6 +886,7 @@ public final class SemanticAnalysis
                 } else {
                     r.error(arithmeticError(node, left, right), node);
                 }
+                break;
             }
             case MULTIPLY:
             case DIVIDE: {
