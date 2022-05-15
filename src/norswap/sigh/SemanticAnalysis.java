@@ -1,5 +1,6 @@
 package norswap.sigh;
 
+import norswap.autumn.positions.Span;
 import norswap.sigh.ast.*;
 
 import norswap.sigh.ast.base.TemplateTypeDeclarationNode;
@@ -535,7 +536,7 @@ public final class SemanticAnalysis
         this.inferenceContext = node;
 
         // TODO check template arguments
-        int depsSize = node.arguments.size() + 1 + 1 + (node.template_arguments != null ? node.template_arguments.size() : 0);
+        int depsSize = node.arguments.size() + 1 + (node.template_arguments != null ? node.template_arguments.size() + 1 : 0);
         Attribute[] dependencies = new Attribute[depsSize];
         dependencies[0] = node.function.attr("type");
         forEachIndexed(node.arguments, (i, arg) -> {
@@ -566,11 +567,14 @@ public final class SemanticAnalysis
             funName = ((ConstructorNode) node.function).ref.name;
         }
 
-        functionDeclarationContext = scope.lookup(funName);
-        functionDeclarationNode = functionDeclarationContext.declaration;
+        if (node.template_arguments != null) {
 
-        // Setting dependencie
-        dependencies[offset] = new Attribute(functionDeclarationNode, "type");
+            functionDeclarationContext = scope.lookup(funName);
+            functionDeclarationNode = functionDeclarationContext != null ? functionDeclarationContext.declaration : new FunDeclarationNode(new Span(0, 0), "", new ArrayList<>(), null, new BlockNode(null, new ArrayList<>()));
+
+            // Setting dependencie
+            dependencies[offset] = new Attribute(functionDeclarationNode, "type");
+        }
 
         R.rule(node, "type")
         .using(dependencies)

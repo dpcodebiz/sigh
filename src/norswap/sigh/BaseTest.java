@@ -20,7 +20,7 @@ public final class BaseTest
     public static void main(String[] args) {
 
         // Reading file
-        String file = "hello.si";
+        String file = "kitchensink.si";
         String path = Paths.get("examples/", file).toAbsolutePath().toString();
         String src = IO.slurp(path);
 
