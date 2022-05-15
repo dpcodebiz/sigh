@@ -425,8 +425,18 @@ public final class SemanticAnalysisTests extends UraniumTestFixture
     }
 
     @Test
-    public void testDotProductContent() {
+    public void testDotProductFailure() {
         failureInput("return [\"test\"] @ [\"test\"]");
+        failureInput("return [\"test\"] @ \"test\"");
+
+        failureInput("return [\"test\"] @ 1");
+        failureInput("return 1 @ [\"test\"]");
+
+        failureInput("return [] @ 1");
+        failureInput("return 1 @ []");
+
+        failureInput("return [[1]] @ 1 ");
+        failureInput("return 1 @ [[1]] ");
     }
 
     @Test
