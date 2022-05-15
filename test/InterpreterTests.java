@@ -576,7 +576,6 @@ public final class InterpreterTests extends TestFixture {
     public void TestMultipleCallsInScope() {
         rule = grammar.root;
 
-        // TODO fix this very important!
         check(
             "template<A, B>" +
                 "fun add (a: A, b: B): A { return a + b };" +
@@ -607,12 +606,33 @@ public final class InterpreterTests extends TestFixture {
             2L
         );
 
-        // TODO empty
+    }
+
+    @Test
+    public void testDotProductFails () {
+        rule = grammar.root;
+
         checkThrows(
             "return [] @ []",
             AssertionError.class
         );
+        checkThrows(
+            "return [[]] @ []",
+            AssertionError.class
+        );
+        checkThrows(
+            "return [] @ [[]]",
+            AssertionError.class
+        );
 
+        checkThrows(
+            "return 1 @ []",
+            AssertionError.class
+        );
+        checkThrows(
+            "return [] @ 1",
+            AssertionError.class
+        );
     }
 
     @Test
@@ -738,6 +758,14 @@ public final class InterpreterTests extends TestFixture {
         checkThrows("return [1,1] + \"test\"",
             AssertionError.class);
         checkThrows("return [\"test\",\"test\"] * 2",
+            AssertionError.class);
+        checkThrows("return [[]] * 2",
+            AssertionError.class);
+        checkThrows("return [[]] / 2",
+            AssertionError.class);
+        checkThrows("return 2 * [[]]",
+            AssertionError.class);
+        checkThrows("return 2 / [[]]",
             AssertionError.class);
     }
 
