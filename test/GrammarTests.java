@@ -277,6 +277,8 @@ public class GrammarTests extends AutumnTestFixture {
     }
 
     @Test public void testTemplateFunctionCall() {
+        // These tests do no pass, and we don't know why. Looks like a regression
+        // from when we added templatereferences to funcallnode
         rule = grammar.suffix_expression;
 
         successExpect("myFunction<Int, Int>(5, 5)",
