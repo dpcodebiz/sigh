@@ -860,7 +860,7 @@ public final class SemanticAnalysis
             case MULTIPLY:
             case DIVIDE: {
                 if (left instanceof ArrayType) {
-                    if (left instanceof IntType || left instanceof FloatType) {
+                    if (right instanceof IntType || right instanceof FloatType) {
                         r.set(0,
                             new ArrayType(
                                 left instanceof IntType

@@ -16,6 +16,7 @@ import norswap.utils.Util;
 import norswap.utils.exceptions.Exceptions;
 import norswap.utils.exceptions.NoStackException;
 import norswap.utils.visitors.ValuedVisitor;
+import java.sql.Array;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
@@ -240,8 +241,13 @@ public final class Interpreter
         boolean floating = leftType instanceof FloatType || rightType instanceof FloatType;
         boolean numeric  = floating || leftType instanceof IntType;
 
-        if (numeric)
+        boolean involvesArray = leftType instanceof ArrayType || rightType instanceof ArrayType;
+
+        if ((numeric || right instanceof IntType || right instanceof Long) && involvesArray) {
+            return scalarProductOp(node, floating, left, right);
+        } else if (numeric) {
             return numericOp(node, floating, (Number) left, (Number) right);
+        }
 
         switch (node.operator) {
             case EQUALITY:
@@ -255,6 +261,47 @@ public final class Interpreter
         }
 
         throw new Error("should not reach here");
+    }
+
+    private Object scalarProductOp
+        (BinaryExpressionNode node, Boolean floating, Object left, Object right)
+    {
+        Object[] array = left instanceof Object[] ? (Object[]) left : (Object[]) right;
+        BinaryOperator op = node.operator;
+
+        if (floating || op ==  BinaryOperator.DIVIDE) {
+            double factor = left instanceof Object[] ? ((Number) right).floatValue() : ((Number) left).floatValue();
+            double[] result = new double[array.length];
+            double elem;
+
+            for (int i = 0; i < array.length; i++) {
+                elem = ((Number) array[i]).floatValue();
+
+                if (op == BinaryOperator.DIVIDE) {
+                    if (left instanceof Object[]) {
+                        result[i] = elem / factor;
+                    } else {
+                        result[i] = factor / elem;
+                    }
+                } else {
+                    result[i] = elem * factor;
+                }
+            }
+
+            return result;
+        } else {
+            long factor = left instanceof Object[] ? ((Number) right).longValue(): ((Number) left).longValue();
+            long[] result = new long[array.length];
+            long elem;
+
+            for (int i = 0; i < array.length; i++) {
+                elem = ((Number) array[i]).longValue();
+
+                result[i] = elem * factor;
+            }
+
+            return result;
+        }
     }
 
     private Object dotProductOp

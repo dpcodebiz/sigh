@@ -342,6 +342,16 @@ public final class SemanticAnalysisTests extends UraniumTestFixture
             "return [] @ []",
             "Trying to dot_product with empty arrays"
         );
+
+        failureInputWith(
+            "return [] @ [1]",
+            "Trying to dot_product with empty arrays"
+        );
+
+        failureInputWith(
+            "return [1] @ []",
+            "Trying to dot_product with empty arrays"
+        );
     }
 
     @Test
@@ -412,15 +422,29 @@ public final class SemanticAnalysisTests extends UraniumTestFixture
                 "var d:Float[] = [b, b]" +
                 "return c @ d"
         );
+    }
 
-        // TODO add str failure
+    @Test
+    public void testDotProductContent() {
+        failureInput("return [\"test\"] @ [\"test\"]");
     }
 
     @Test
     public void testArrayScalarProduct() {
         successInput("return 2 * [1, 1]");
         successInput("return 2 / [1, 1]");
+        successInput("return [1, 1] / 2");
         failureInput("return \"test\" * [1, 1]");
+    }
+
+    @Test
+    public void testArrayScalarProductFail() {
+        failureInput("return [\"test\"] * \"test\"");
+        failureInput("return [\"test\"] * 1");
+        failureInput("return [\"test\"] / 1");
+        failureInput("return 1 * [\"test\"]");
+        failureInput("return [\"test\"] / \"test\"");
+        failureInput("return \"test\" * [\"test\"] ");
     }
 
     // ---------------------------------------------------------------------------------------------
