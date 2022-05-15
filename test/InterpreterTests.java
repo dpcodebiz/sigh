@@ -576,7 +576,6 @@ public final class InterpreterTests extends TestFixture {
     public void TestMultipleCallsInScope() {
         rule = grammar.root;
 
-        // TODO fix this very important!
         check(
             "template<A, B>" +
                 "fun add (a: A, b: B): A { return a + b };" +
@@ -607,12 +606,33 @@ public final class InterpreterTests extends TestFixture {
             2L
         );
 
-        // TODO empty
+    }
+
+    @Test
+    public void testDotProductFails () {
+        rule = grammar.root;
+
         checkThrows(
             "return [] @ []",
             AssertionError.class
         );
+        checkThrows(
+            "return [[]] @ []",
+            AssertionError.class
+        );
+        checkThrows(
+            "return [] @ [[]]",
+            AssertionError.class
+        );
 
+        checkThrows(
+            "return 1 @ []",
+            AssertionError.class
+        );
+        checkThrows(
+            "return [] @ 1",
+            AssertionError.class
+        );
     }
 
     @Test
@@ -700,6 +720,53 @@ public final class InterpreterTests extends TestFixture {
                 "return c @ d",
             2.0d
         );
+    }
+
+    @Test
+    public void testArrayScalarProduct() {
+        rule = grammar.root;
+
+        check("return 2 * [1, 1]",
+            new long[]{ 2L, 2L }
+        );
+        check("return 2 / [1, 1]",
+            new double[]{ 2.0d, 2.0d }
+        );
+        check("return [1, 1] / 2",
+            new double[]{ 0.5d, 0.5d }
+        );
+        check("return [1, 1] / 2.0",
+            new double[]{ 0.5d, 0.5d }
+        );
+        check("return [1.0, 1.0] / 2.0",
+            new double[]{ 0.5d, 0.5d }
+        );
+    }
+
+    @Test
+    public void testArrayScalarProductErrors() {
+        rule = grammar.root;
+
+        checkThrows("return \"test\" * [1, 1]",
+            AssertionError.class);
+        checkThrows("return \"test\" / [1, 1]",
+            AssertionError.class);
+        checkThrows("return [1, 1] * \"test\"",
+            AssertionError.class);
+        checkThrows("return [1,1] / \"test\"",
+            AssertionError.class);
+        checkThrows("return [1,1] + \"test\"",
+            AssertionError.class);
+        checkThrows("return [\"test\",\"test\"] * 2",
+            AssertionError.class);
+        checkThrows("return [[]] * 2",
+            AssertionError.class);
+        checkThrows("return [[]] / 2",
+            AssertionError.class);
+        checkThrows("return 2 * [[]]",
+            AssertionError.class);
+        checkThrows("return 2 / [[]]",
+            AssertionError.class);
     }
 
     // NOTE(norswap): Not incredibly complete, but should cover the basics.

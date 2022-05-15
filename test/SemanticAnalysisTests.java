@@ -9,6 +9,8 @@ import norswap.utils.visitors.Walker;
 import org.testng.annotations.Test;
 
 import static java.util.Arrays.asList;
+import static norswap.sigh.ast.BinaryOperator.DIVIDE;
+import static norswap.sigh.ast.BinaryOperator.MULTIPLY;
 
 /**
  * NOTE(norswap): These tests were derived from the {@link InterpreterTests} and don't test anything
@@ -340,6 +342,16 @@ public final class SemanticAnalysisTests extends UraniumTestFixture
             "return [] @ []",
             "Trying to dot_product with empty arrays"
         );
+
+        failureInputWith(
+            "return [] @ [1]",
+            "Trying to dot_product with empty arrays"
+        );
+
+        failureInputWith(
+            "return [1] @ []",
+            "Trying to dot_product with empty arrays"
+        );
     }
 
     @Test
@@ -410,6 +422,53 @@ public final class SemanticAnalysisTests extends UraniumTestFixture
                 "var d:Float[] = [b, b]" +
                 "return c @ d"
         );
+    }
+
+    @Test
+    public void testDotProductFailure() {
+        failureInput("return [\"test\"] @ [\"test\"]");
+        failureInput("return [\"test\"] @ \"test\"");
+
+        failureInput("return [\"test\"] @ 1");
+        failureInput("return 1 @ [\"test\"]");
+
+        failureInput("return [] @ 1");
+        failureInput("return 1 @ []");
+
+        failureInput("return [[1]] @ 1 ");
+        failureInput("return 1 @ [[1]] ");
+    }
+
+    @Test
+    public void testArrayScalarProduct() {
+        successInput("return 2 * [1, 1]");
+        successInput("return 2 / [1, 1]");
+        successInput("return [1, 1] / 2");
+        failureInput("return \"test\" * [1, 1]");
+    }
+
+    @Test
+    public void testArrayScalarProductFail() {
+
+        failureInput("return [\"test\"] * \"test\"");
+
+        failureInput("return [\"test\"] * 1");
+        failureInput("return 1 * [\"test\"]");
+
+        failureInput("return [] * 1");
+        failureInput("return 1 * []");
+
+        failureInput("return [\"test\"] / 1");
+        failureInput("return 1 / [\"test\"]");
+
+        failureInput("return [\"test\"] / \"test\"");
+        failureInput("return \"test\" * [\"test\"] ");
+
+        failureInput("return [[1]] * 1 ");
+        failureInput("return 1 * [[1]] ");
+
+        failureInput("return 1 / [[1]] ");
+        failureInput("return [[1]] / 1 ");
     }
 
     // ---------------------------------------------------------------------------------------------

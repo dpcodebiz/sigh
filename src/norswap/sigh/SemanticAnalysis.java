@@ -684,6 +684,36 @@ public final class SemanticAnalysis
                     return;
                 }
             }
+        } else if (node.operator == MULTIPLY || node.operator == DIVIDE) {
+            if (node.left instanceof ArrayLiteralNode) {
+                if (((ArrayLiteralNode) node.left).components.size() == 0) {
+                    R.error(new SemanticError("Expected a scalar but got a string", null, null));
+                    return;
+                } else if (((ArrayLiteralNode) node.left).components.get(0) instanceof StringLiteralNode) {
+                    R.error(new SemanticError("Expected an int or a float array but got a string array", null, null));
+                } else if (((ArrayLiteralNode) node.left).components.get(0) instanceof ArrayLiteralNode) {
+                    R.error(new SemanticError("Scalar product with multidimensional array is not supported yet", null, null));
+                }
+                if (node.right instanceof StringLiteralNode) {
+                    R.error(new SemanticError("Expected a scalar but got a string", null, null));
+                    return;
+                }
+            }
+
+            if (node.right instanceof ArrayLiteralNode) {
+                if (((ArrayLiteralNode) node.right).components.size() == 0) {
+                    R.error(new SemanticError("Expected a scalar but got a string", null, null));
+                    return;
+                } else if (((ArrayLiteralNode) node.right).components.get(0) instanceof StringLiteralNode) {
+                    R.error(new SemanticError("Expected an int or a float array but got a string array", null, null));
+                } else if (((ArrayLiteralNode) node.right).components.get(0) instanceof ArrayLiteralNode) {
+                    R.error(new SemanticError("Scalar product with multidimensional array is not supported yet", null, null));
+                }
+                if (node.left instanceof StringLiteralNode) {
+                    R.error(new SemanticError("Expected a scalar but got a string", null, null));
+                    return;
+                }
+            }
         }
 
         // Checking if any template parameters involved here
@@ -711,9 +741,10 @@ public final class SemanticAnalysis
             // Needed in order to be able to process the binary arithmetic properly
             if (left instanceof TemplateType) left = ((TemplateType) left).getTemplateTypeReference();
             if (right instanceof TemplateType) right = ((TemplateType) right).getTemplateTypeReference();
-
             if (node.operator == ADD && (left instanceof StringType || right instanceof StringType))
                 r.set(0, StringType.INSTANCE);
+            else if (isArrayArithmetic(node.operator, left, right))
+                binaryArrayArithmetic(r, node, left, right);
             else if (isArithmetic(node.operator))
                 binaryArithmetic(r, node, left, right);
             else if (isComparison(node.operator))
@@ -722,8 +753,7 @@ public final class SemanticAnalysis
                 binaryLogic(r, node, left, right);
             else if (isEquality(node.operator))
                 binaryEquality(r, node, left, right);
-            else if (isArrayArithmetic(node.operator))
-                binaryArrayArithmetic(r, node, left, right);
+
         }));
     }
 
@@ -745,8 +775,9 @@ public final class SemanticAnalysis
         return op == EQUALITY || op == NOT_EQUALS;
     }
 
-    private boolean isArrayArithmetic (BinaryOperator op) {
-        return op == DOT_PRODUCT;
+    private boolean isArrayArithmetic (BinaryOperator op, Type left, Type right) {
+        boolean arrayInvolved = left instanceof ArrayType || right instanceof ArrayType;
+        return op == DOT_PRODUCT || (op == MULTIPLY && arrayInvolved) || (op == DIVIDE && arrayInvolved);
     }
 
     // ---------------------------------------------------------------------------------------------
@@ -830,28 +861,66 @@ public final class SemanticAnalysis
 
     private void binaryArrayArithmetic (Rule r, BinaryExpressionNode node, Type left, Type right)
     {
-        if (left instanceof ArrayType && right instanceof ArrayType) {
-            Type leftType = ((ArrayType) left).componentType;
-            Type rightType = ((ArrayType) right).componentType;
+        switch (node.operator) {
+            case DOT_PRODUCT:
+            {
+                if (left instanceof ArrayType && right instanceof ArrayType) {
+                    Type leftType = ((ArrayType) left).componentType;
+                    Type rightType = ((ArrayType) right).componentType;
 
-            boolean leftLegal = isArrayLegalForDotProduct((ArrayType) left);
-            boolean rightLegal = isArrayLegalForDotProduct((ArrayType) right);
+                    boolean leftLegal = isArrayLegalForDotProduct((ArrayType) left);
+                    boolean rightLegal = isArrayLegalForDotProduct((ArrayType) right);
 
-            if (!leftLegal) {
-                r.error("Left handside of a dot product operator can only be Int[] or Float[]", node);
+                    if (!leftLegal) {
+                        r.error("Left handside of a dot product operator can only be Int[] or Float[]", node);
+                    }
+
+                    if (!rightLegal) {
+                        r.error("Right handside of a dot product operator can only be Int[] or Float[]", node);
+                    }
+
+                    if (leftLegal && rightLegal) {
+                        r.set(0, IntType.INSTANCE);
+                    }
+
+                } else {
+                    r.error(arithmeticError(node, left, right), node);
+                }
+                break;
             }
+            case MULTIPLY:
+            case DIVIDE: {
+                if (left instanceof ArrayType) {
+                    if (right instanceof IntType || right instanceof FloatType) {
+                        r.set(0,
+                            new ArrayType(
+                                left instanceof IntType
+                                ? IntType.INSTANCE
+                                : FloatType.INSTANCE
+                            )
+                        );
+                    } else {
+                        r.error(arithmeticError(node, left, right), node);
+                    }
+                }
+                if (right instanceof ArrayType) {
+                    if (left instanceof IntType || left instanceof FloatType) {
+                        r.set(0,
+                            new ArrayType(
+                                left instanceof IntType
+                                    ? IntType.INSTANCE
+                                    : FloatType.INSTANCE
+                            )
+                        );
+                    } else {
+                        r.error(arithmeticError(node, left, right), node);
+                    }
+                }
 
-            if (!rightLegal) {
-                r.error("Right handside of a dot product operator can only be Int[] or Float[]", node);
+                break;
             }
-
-            if (leftLegal && rightLegal) {
-                r.set(0, IntType.INSTANCE);
-            }
-
-        } else {
-            r.error(arithmeticError(node, left, right), node);
         }
+
     }
 
     // ---------------------------------------------------------------------------------------------
