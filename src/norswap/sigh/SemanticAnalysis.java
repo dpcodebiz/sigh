@@ -684,6 +684,36 @@ public final class SemanticAnalysis
                     return;
                 }
             }
+        } else if (node.operator == MULTIPLY || node.operator == DIVIDE) {
+            if (node.left instanceof ArrayLiteralNode) {
+                if (((ArrayLiteralNode) node.left).components.size() == 0) {
+                    R.error(new SemanticError("Expected a scalar but got a string", null, null));
+                    return;
+                } else if (((ArrayLiteralNode) node.left).components.get(0) instanceof StringLiteralNode) {
+                    R.error(new SemanticError("Expected an int or a float array but got a string array", null, null));
+                } else if (((ArrayLiteralNode) node.left).components.get(0) instanceof ArrayLiteralNode) {
+                    R.error(new SemanticError("Scalar product with multidimensional array is not supported yet", null, null));
+                }
+                if (node.right instanceof StringLiteralNode) {
+                    R.error(new SemanticError("Expected a scalar but got a string", null, null));
+                    return;
+                }
+            }
+
+            if (node.right instanceof ArrayLiteralNode) {
+                if (((ArrayLiteralNode) node.right).components.size() == 0) {
+                    R.error(new SemanticError("Expected a scalar but got a string", null, null));
+                    return;
+                } else if (((ArrayLiteralNode) node.right).components.get(0) instanceof StringLiteralNode) {
+                    R.error(new SemanticError("Expected an int or a float array but got a string array", null, null));
+                } else if (((ArrayLiteralNode) node.right).components.get(0) instanceof ArrayLiteralNode) {
+                    R.error(new SemanticError("Scalar product with multidimensional array is not supported yet", null, null));
+                }
+                if (node.left instanceof StringLiteralNode) {
+                    R.error(new SemanticError("Expected a scalar but got a string", null, null));
+                    return;
+                }
+            }
         }
 
         // Checking if any template parameters involved here
