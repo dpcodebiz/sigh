@@ -1,0 +1,22 @@
+template<T1, T2>
+fun sum(a:T1, b:T2):T1 {
+    return a + b
+}
+
+template<T1, T2>
+fun mult_array_first_elements(a:T1, b:T2):Int {
+    return a[0] * b[0] * ([1, 0, 0] @ [2, 0, 0])
+}
+
+var result:Int = sum<Int, Int>(5, 5)
+var result2:String = sum<String, String>("Hello", " world!")
+
+print("" + result)
+print("" + result2)
+
+print("Let's do some more complex maths!!")
+
+var a:Int = [1, 2, 3] @ [1, 0, 0]
+var b:Int[] = [1, 0, 0]
+
+print(mult_array_first_elements<Int[], Int[]>([b @ [1, 0, 0], 0, 0], [3, 0, 0]))

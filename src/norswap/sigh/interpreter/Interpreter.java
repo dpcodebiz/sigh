@@ -239,9 +239,9 @@ public final class Interpreter
             return convertToString(left) + convertToString(right);
 
         boolean floating = leftType instanceof FloatType || rightType instanceof FloatType;
-        boolean numeric  = floating || leftType instanceof IntType;
+        boolean numeric  = floating || leftType instanceof IntType || rightType instanceof IntType;
 
-        boolean involvesArray = leftType instanceof ArrayType || rightType instanceof ArrayType;
+        boolean involvesArray = left instanceof Object[] || right instanceof Object[];
 
         if ((numeric || right instanceof IntType || right instanceof Long) && involvesArray) {
             return scalarProductOp(node, floating, left, right);
@@ -500,7 +500,7 @@ public final class Interpreter
 
         RootScope rootscope1 = reactor.get(node, "scope");
         this.reactor.getAll(node).forEach((Entry<Attribute, Object> entry) -> {
-            if (entry.getValue() instanceof RootScope) {
+            if (entry.getValue() instanceof RootScope && entry.getKey().name.equals("scope")) {
                 rootScope = cast(entry.getValue(), RootScope.class);
             }
         });
@@ -524,7 +524,7 @@ public final class Interpreter
     // ---------------------------------------------------------------------------------------------
 
     private Void block (BlockNode node) {
-        Scope scope = reactor.get(node, "scope");
+        Scope scope = (Scope) getAttr(node, "scope", Scope.class);
         storage = new ScopeStorage(scope, storage);
         node.statements.forEach(this::run);
         storage = storage.parent;
@@ -731,7 +731,8 @@ public final class Interpreter
 
     private Void varDecl (VarDeclarationNode node)
     {
-        Scope scope = reactor.get(node, "scope");
+        // Had to change this line because reactor.get not working properly
+        Scope scope = (Scope) getAttr(node, "scope", Scope.class);
         assign(scope, node.name, get(node.initializer), reactor.get(node, "type"));
         return null;
     }

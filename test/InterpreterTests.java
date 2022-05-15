@@ -570,6 +570,64 @@ public final class InterpreterTests extends TestFixture {
             6L
         );
 
+        check(
+            "template<T1, T2>\n" +
+                "fun sum(a:T1, b:T2):T1 {\n" +
+                "    return a + b\n" +
+                "}\n" +
+                "\n" +
+                "var result:Int = sum<Int, Int>(5, 5)\n" +
+                "var result2:String = sum<String, String>(\"Hello\", \" world!\")\n" +
+                "\n" +
+                "print(\"\" + result)\n" +
+                "print(\"\" + result2)",
+            null
+        );
+
+    }
+    @Test
+    public void TestTemplateIntegration() {
+        // OK
+        rule = grammar.root;
+
+//        check(
+//            "template<T1, T2>\n" +
+//                "fun sum(a:T1, b:T2):T1 {\n" +
+//                "    return a + b\n" +
+//                "}\n" +
+//                "\n" +
+//                "var result:Int = sum<Int, Int>(5, 5)\n" +
+//                "var result2:String = sum<String, String>(\"Hello\", \" world!\")\n" +
+//                "\n" +
+//                "print(\"\" + result)\n" +
+//                "print(\"\" + result2)",
+//            null
+//        );
+
+        check("template<T1, T2>\n" +
+            "fun sum(a:T1, b:T2):T1 {\n" +
+            "    return a + b\n" +
+            "}\n" +
+            "\n" +
+            "template<T1, T2>\n" +
+            "fun mult_array_first_elements(a:T1, b:T2):Int {\n" +
+            "    return a[0] * b[0] * ([1, 0, 0] @ [2, 0, 0])\n" +
+            "}\n" +
+            "\n" +
+            "var result:Int = sum<Int, Int>(5, 5)\n" +
+            "var result2:String = sum<String, String>(\"Hello\", \" world!\")\n" +
+            "\n" +
+            "print(\"\" + result)\n" +
+            "print(\"\" + result2)\n" +
+            "\n" +
+            "print(\"Let's do some more complex maths!!\")\n" +
+            "\n" +
+            "var a:Int = [1, 2, 3] @ [1, 0, 0]\n" +
+            "var b:Int[] = [1, 0, 0]\n" +
+            "\n" +
+            "print(mult_array_first_elements<Int[], Int[]>([b @ [1, 0, 0], 0, 0], [3, 0, 0]))\n",
+            null);
+
     }
 
     @Test
