@@ -32,4 +32,4 @@ print("" + (universe == 6));
 print("" + universe);
 print("After some very deep computations, " + prefix + mult_array_first_elements<Int[], Int[], Float>([bloop() @ [1, 0, 0], 0, 0], [3, 0, 0]));
 
-print("Therefore, are we leaving inside a simulation? " + inside_universe)
+print("Therefore, are we living inside a simulation? " + inside_universe)
