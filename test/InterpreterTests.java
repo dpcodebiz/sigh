@@ -456,6 +456,14 @@ public final class InterpreterTests extends TestFixture {
                 "return add<Int, Int>(1, 1)",
             2L
         );
+
+        // All and more template arguments than function arguments
+        check(
+            "template<A, B>" +
+                "fun double (a: A): B { return a + a };" +
+                "return double<Int, Int>(1)",
+            2L
+        );
     }
 
     @Test
@@ -485,6 +493,14 @@ public final class InterpreterTests extends TestFixture {
                 "fun add (a: A, b: B): B { return a + b };" +
                 "return add<Float, Float>(1.0, 1.0)",
             2.0
+        );
+
+        // Bool
+        check(
+            "template<A, B>" +
+                "fun logic (a: A, b: B): B { return a && b };" +
+                "return logic<Bool, Bool>(true, false)",
+            false
         );
     }
 
@@ -590,19 +606,19 @@ public final class InterpreterTests extends TestFixture {
         // OK
         rule = grammar.root;
 
-//        check(
-//            "template<T1, T2>\n" +
-//                "fun sum(a:T1, b:T2):T1 {\n" +
-//                "    return a + b\n" +
-//                "}\n" +
-//                "\n" +
-//                "var result:Int = sum<Int, Int>(5, 5)\n" +
-//                "var result2:String = sum<String, String>(\"Hello\", \" world!\")\n" +
-//                "\n" +
-//                "print(\"\" + result)\n" +
-//                "print(\"\" + result2)",
-//            null
-//        );
+        check(
+            "template<T1, T2>\n" +
+                "fun sum(a:T1, b:T2):T1 {\n" +
+                "    return a + b\n" +
+                "}\n" +
+                "\n" +
+                "var result:Int = sum<Int, Int>(5, 5)\n" +
+                "var result2:String = sum<String, String>(\"Hello\", \" world!\")\n" +
+                "\n" +
+                "print(\"\" + result)\n" +
+                "print(\"\" + result2)",
+            null
+        );
 
         check("template<T1, T2>\n" +
             "fun sum(a:T1, b:T2):T1 {\n" +
@@ -628,6 +644,42 @@ public final class InterpreterTests extends TestFixture {
             "print(mult_array_first_elements<Int[], Int[]>([b @ [1, 0, 0], 0, 0], [3, 0, 0]))\n",
             null);
 
+        check("template<T1, T2>\n" +
+            "fun sum(a:T1, b:T2):T1 {\n" +
+            "    return a + b\n" +
+            "}\n" +
+            "\n" +
+            "template<T1, T2, R>\n" +
+            "fun mult_array_first_elements(a:T1, b:T2):R {\n" +
+            "    return a[0] * b[0] * ([1, 0, 0] @ [2, 0, 0])\n" +
+            "}\n" +
+            "\n" +
+            "var result:Int = sum<Int, Int>(5, 5)\n" +
+            "var result2:String = sum<String, String>(\"Hello\", \" world!\")\n" +
+            "\n" +
+            "print(\"\" + result)\n" +
+            "print(\"\" + result2)\n" +
+            "\n" +
+            "print(\"Let's do some more complex maths!!\")\n" +
+            "\n" +
+            "var a:Int = [1, 2, 3] @ [1, 0, 0]\n" +
+            "var b:Int[] = [1, 0, 0]\n" +
+            "\n" +
+            "fun bloop():Int[] {\n" +
+            "    return [1, 1, 1]\n" +
+            "}\n" +
+            "\n" +
+            "var prefix:String = sum<String, String>(\"The big number\", \" of this universe is probably :\");\n" +
+            "var universe:Float = mult_array_first_elements<Float[], Int[], Float>([bloop() @ [1.0, 0.0, 0.0], 0.0, 0.0], [3, 0, 0]);\n" +
+            "var inside_universe:Bool = (universe == 6.0);\n" +
+            "\n" +
+            "print(mult_array_first_elements<Int[], Int[], Int>([bloop() @ [1, 0, 0], 0, 0], [3, 0, 0]));\n" +
+            "print(\"\" + (universe == 6));\n" +
+            "print(\"\" + universe);\n" +
+            "print(\"After some very deep computations, \" + prefix + mult_array_first_elements<Int[], Int[], Float>([bloop() @ [1, 0, 0], 0, 0], [3, 0, 0]));\n" +
+            "\n" +
+            "print(\"Therefore, are we leaving inside a simulation? \" + inside_universe)"
+        , null);
     }
 
     @Test

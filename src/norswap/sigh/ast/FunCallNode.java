@@ -1,12 +1,12 @@
 package norswap.sigh.ast;
 
+import com.sun.org.apache.xpath.internal.operations.Bool;
 import norswap.autumn.positions.Span;
 import norswap.sigh.ast.base.TemplateTypeDeclarationNode;
 import norswap.sigh.ast.base.TemplateTypeNode;
 import norswap.sigh.ast.base.TemplateTypeReference;
 import norswap.sigh.scopes.Scope;
-import norswap.sigh.types.TemplateType;
-import norswap.sigh.types.Type;
+import norswap.sigh.types.*;
 import norswap.utils.Util;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -18,6 +18,7 @@ public class FunCallNode extends ExpressionNode
     public final List<ExpressionNode> arguments;
     public List<TypeNode> template_arguments;
     public List<TemplateTypeReference> templateTypeReferences;
+    public HashMap<String, TypeNode> templateArgsMap;
 
     @SuppressWarnings("unchecked")
     public FunCallNode (Span span, Object function, Object arguments) {
@@ -38,6 +39,7 @@ public class FunCallNode extends ExpressionNode
         // Setting up template arguments
         this.template_arguments = (template_arguments == null) ? new ArrayList<>() : Util.cast(template_arguments, List.class);
         this.templateTypeReferences = new ArrayList<>();
+        this.templateArgsMap = new HashMap<>();
 
         if (this.template_arguments != null) {
             for (int i = 0; i < this.template_arguments.size(); i++) {
@@ -54,8 +56,14 @@ public class FunCallNode extends ExpressionNode
         TypeNode returnTypeNode = ((FunDeclarationNode) decl).returnType;
         if (((FunDeclarationNode) decl).returnType instanceof TemplateTypeNode) {
             String returnTypeName = ((TemplateTypeNode) returnTypeNode).name;
-            TemplateTypeReference templateTypeReference = this.templateTypeReferences.stream().filter(templateTypeReference1 -> templateTypeReference1.declarationNode.name.equals(returnTypeName)).findAny().get();
-            Type returnType = templateTypeReference.value;
+            TemplateTypeReference templateTypeReference = this.templateTypeReferences.stream().filter(templateTypeReference1 -> templateTypeReference1.declarationNode.name.equals(returnTypeName)).findAny().orElse(null);
+            Type returnType;
+            if (templateTypeReference != null) {
+                returnType = templateTypeReference.value;
+            } else {
+                TypeNode typeNode = this.templateArgsMap.get(returnTypeName);
+                returnType = inferType(typeNode);
+            }
 
             return returnType;
         }
@@ -63,11 +71,35 @@ public class FunCallNode extends ExpressionNode
         return null;
     }
 
+    public Type inferType(TypeNode typeNode) {
+        if (typeNode instanceof SimpleTypeNode) {
+            switch (((SimpleTypeNode) typeNode).name) {
+                case "Bool": {
+                    return BoolType.INSTANCE;
+                }
+                case "Float": {
+                    return FloatType.INSTANCE;
+                }
+                case "Int": {
+                    return IntType.INSTANCE;
+                }
+                case "String": {
+                    return StringType.INSTANCE;
+                }
+            }
+        } else if (typeNode instanceof ArrayTypeNode) {
+            return new ArrayType(inferType(typeNode));
+        }
+
+        throw new Error("Unsupported return type for template");
+    }
+
     /**
      * Clears all types assigned to template parameters
      */
     public void clearTemplateParametersValue() {
         templateTypeReferences.clear();
+        templateArgsMap.clear();
     }
 
     /**
@@ -81,12 +113,16 @@ public class FunCallNode extends ExpressionNode
 
         // Skip if no template args
         if (templateArgs == null) return;
+        int index = 0;
 
         // Map ParamType to TemplateArg
-        HashMap<String, TypeNode> paramToArg = new HashMap<>();
+        for (TypeNode templateArg : templateArgs) {
+            templateArgsMap.put(declarationNodes.get(index).name, templateArg);
+            index++;
+        }
 
         // Assigning the type to each template parameter
-        int index = 0;
+        index = 0;
         for (Type paramType : paramTypes) {
 
             if (!(paramType instanceof TemplateType)) continue;

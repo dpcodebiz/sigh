@@ -294,6 +294,12 @@ public final class SemanticAnalysisTests extends UraniumTestFixture
             "}" +
             "" +
             "var result:Int = sum<Int, Int, Int>(5, 5)");
+        successInput("template<R,T1,T2>" +
+            "fun sum(a:Int, b:Int):Int {" +
+            "    return a + b" +
+            "}" +
+            "" +
+            "var result:Int = sum(5, 5)");
     }
 
     @Test
