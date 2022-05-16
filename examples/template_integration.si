@@ -3,8 +3,8 @@ fun sum(a:T1, b:T2):T1 {
     return a + b
 }
 
-template<T1, T2>
-fun mult_array_first_elements(a:T1, b:T2):Int {
+template<T1, T2, R>
+fun mult_array_first_elements(a:T1, b:T2):R {
     return a[0] * b[0] * ([1, 0, 0] @ [2, 0, 0])
 }
 
@@ -19,4 +19,17 @@ print("Let's do some more complex maths!!")
 var a:Int = [1, 2, 3] @ [1, 0, 0]
 var b:Int[] = [1, 0, 0]
 
-print(mult_array_first_elements<Int[], Int[]>([b @ [1, 0, 0], 0, 0], [3, 0, 0]))
+fun bloop():Int[] {
+    return [1, 1, 1]
+}
+
+var prefix:String = sum<String, String>("The big number", " of this universe is probably :");
+var universe:Float = mult_array_first_elements<Float[], Int[], Float>([bloop() @ [1.0, 0.0, 0.0], 0.0, 0.0], [3, 0, 0]);
+var inside_universe:Bool = (universe == 6.0);
+
+print(mult_array_first_elements<Int[], Int[], Int>([bloop() @ [1, 0, 0], 0, 0], [3, 0, 0]));
+print("" + (universe == 6));
+print("" + universe);
+print("After some very deep computations, " + prefix + mult_array_first_elements<Int[], Int[], Float>([bloop() @ [1, 0, 0], 0, 0], [3, 0, 0]));
+
+print("Therefore, are we leaving inside a simulation? " + inside_universe)
