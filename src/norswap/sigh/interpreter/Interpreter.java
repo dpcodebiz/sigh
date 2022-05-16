@@ -241,7 +241,7 @@ public final class Interpreter
         boolean floating = leftType instanceof FloatType || rightType instanceof FloatType;
         boolean numeric  = floating || leftType instanceof IntType || rightType instanceof IntType;
 
-        boolean involvesArray = left instanceof Object[] || right instanceof Object[];
+        boolean involvesArray = left.getClass().isArray() || right.getClass().isArray();
 
         if ((numeric || right instanceof IntType || right instanceof Long) && involvesArray) {
             return scalarProductOp(node, floating, left, right);
@@ -271,7 +271,7 @@ public final class Interpreter
 
         if (floating || op ==  BinaryOperator.DIVIDE) {
             double factor = left instanceof Object[] ? ((Number) right).floatValue() : ((Number) left).floatValue();
-            double[] result = new double[array.length];
+            Double[] result = new Double[array.length];
             double elem;
 
             for (int i = 0; i < array.length; i++) {
@@ -291,7 +291,7 @@ public final class Interpreter
             return result;
         } else {
             long factor = left instanceof Object[] ? ((Number) right).longValue(): ((Number) left).longValue();
-            long[] result = new long[array.length];
+            Long[] result = new Long[array.length];
             long elem;
 
             for (int i = 0; i < array.length; i++) {
@@ -580,37 +580,6 @@ public final class Interpreter
         Scope scope = (Scope) getAttr(decl, "scope", Scope.class);
 
         // Inferring types for template types here
-//        for (ParameterNode parameterNode : ((FunDeclarationNode) decl).parameters) {
-//
-//            // Getting context to redeclare the variable
-//            if (parameterNode.type instanceof TemplateTypeNode) {
-//                DeclarationNode declarationNode = scope.lookupLocal(parameterNode.name);
-//
-//                if (declarationNode != null) {
-//
-//                    String templateParamName = ((TemplateTypeNode) ((ParameterNode) declarationNode).type).name;
-//                    TemplateTypeReference reference = node
-//                        .templateTypeReferences
-//                        .stream()
-//                        .filter(templateTypeReference -> templateTypeReference.declarationNode.name.equals(templateParamName)
-//                        )
-//                        .findAny()
-//                        .get();
-//
-//                    if (reference != null) {
-//                        TemplateTypeDeclarationNode newDecl = new TemplateTypeDeclarationNode(declarationNode.span, templateParamName);
-//                        newDecl.value = reference.value;
-//                        scope.declare(parameterNode.name, newDecl);
-//                    } else {
-//                        // ease further debug process in case this happens
-//                        throw new AssertionError("An error occurred when trying to infer the template parameter declarations for function call "+node.contents());
-//                    }
-//
-//                }
-//
-//            }
-//
-//        }
         storage = new ScopeStorage(scope, storage);
 
         FunDeclarationNode funDecl = (FunDeclarationNode) decl;
@@ -618,8 +587,8 @@ public final class Interpreter
                 (arg, param) -> storage.set(scope, param.name, arg));
 
         if (node.template_arguments != null) {
-            coIterate(node.template_arguments, node.templateTypeReferences,
-                (arg, param) -> storage.set(scope, param.declarationNode.name, arg));
+            coIterate(node.template_arguments, funDecl.templateParameters,
+                (arg, param) -> storage.set(scope, param.name, arg));
         }
 
 
