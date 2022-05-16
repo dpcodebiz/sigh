@@ -837,19 +837,19 @@ public final class InterpreterTests extends TestFixture {
         rule = grammar.root;
 
         check("return 2 * [1, 1]",
-            new long[]{ 2L, 2L }
+            new Long[]{ 2L, 2L }
         );
         check("return 2 / [1, 1]",
-            new double[]{ 2.0d, 2.0d }
+            new Double[]{ 2.0d, 2.0d }
         );
         check("return [1, 1] / 2",
-            new double[]{ 0.5d, 0.5d }
+            new Double[]{ 0.5d, 0.5d }
         );
         check("return [1, 1] / 2.0",
-            new double[]{ 0.5d, 0.5d }
+            new Double[]{ 0.5d, 0.5d }
         );
         check("return [1.0, 1.0] / 2.0",
-            new double[]{ 0.5d, 0.5d }
+            new Double[]{ 0.5d, 0.5d }
         );
     }
 
@@ -877,6 +877,116 @@ public final class InterpreterTests extends TestFixture {
             AssertionError.class);
         checkThrows("return 2 / [[]]",
             AssertionError.class);
+    }
+
+    @Test
+    public void testReportExamples() {
+        rule = grammar.root;
+
+        // Mono typed
+        check("template<T1> \n" +
+            "    fun sum(a:T1, b:T1):T1 {\n" +
+            "        return a+b\n" +
+            "    }\n" +
+            "    \n" +
+            "    print(sum<Int>(1,2)) // 3\n" +
+            "    print(sum<Float>(1.0,2.0)) // 3.0\n" +
+            "    print(\"Hello \" + sum<String>(\"Nicolas\",\"Laurent\")) // Hello NicolasLaurent",
+            null,
+            "3\n3.0\nHello NicolasLaurent\n"
+        );
+
+        // Poly typed
+        check("template<R, T1, T2> \n" +
+            "    fun complexFunction(a:T1, b:T2):R {\n" +
+            "        return a && b\n" +
+            "    }\n" +
+            "    \n" +
+            "    print(complexFunction<Bool, Bool, Bool>(true, false)) // false\n",
+            null,
+            "false\n");
+
+        // Array support
+        check(
+            "template<T1, R> \n" +
+                "fun addFirstElements(a:T1, b:T1):R {\n" +
+                "        return a[0] + b[0];\n" +
+                "    }\n" +
+                "    print(addFirstElements<Int[], Int>([1], [1])); // 2\n",
+            null,
+            "2\n"
+        );
+
+        // Array support
+        check(
+            "// Specify the array type inside the function definition\n" +
+                "    template<T1, T2, T3> \n" +
+                "    fun addDeep(a:T1, b:T2):T3 {\n" +
+                "        return a[0][0] + b[0]\n" +
+                "    }\n" +
+                "    \n" +
+                "    print(addDeep<Int[][], Int[], Int>([[1], [1]], [1])) // 2",
+            null,
+            "2\n"
+        );
+
+        // Array dot product
+        check("var a:Int[] = [1, 2, 3]\n" +
+                "    var b:Int[] = [1, 2, 3]\n" +
+                "    var c:Float[] = [1.0, 2.0, 3.0]\n" +
+                "    \n" +
+                "    // '@' operator\n" +
+                "    var d:Int = a @ b // 14\n" +
+                "    var e:Int = b @ a // 14\n" +
+                "    var f:Float = a @ c // 14.0\n" +
+                "print(\"\" + d);" +
+                "print(\"\" + e);" +
+                "print(\"\" + f);",
+            null,
+            "14\n14\n14.0\n");
+
+        // Array scalar product
+        check("var a:Int[] = [1, 2, 3]\n" +
+            "    var b:Float[] = [1.0, 2.0, 3.0]\n" +
+            "    \n" +
+            "    // '*' operator\n" +
+            "    var c:Int[] = 5 * a // [5, 10, 15]\n" +
+            "return c",
+            new Long[] { 5L, 10L, 15L }
+        );
+
+        check("var a:Int[] = [1, 2, 3]\n" +
+                "    var b:Float[] = [1.0, 2.0, 3.0]\n" +
+                "    \n" +
+                "    // '*' operator\n" +
+                "    var d:Float[] = 5.0 * a // [5.0, 10.0, 15.0]\n" +
+                "    \n" +
+                "return d",
+            new Double[] { 5.0d, 10.0d, 15.0d }
+        );
+
+        check("var a:Int[] = [1, 2, 3]\n" +
+                "    var b:Float[] = [1.0, 2.0, 3.0]\n" +
+                "    \n" +
+                "    // '*' operator\n" +
+                "    var c:Int[] = 5 * a // [5, 10, 15]\n" +
+                "    \n" +
+                "    // '/' operator\n" +
+                "    var e:Float[] = 5 / c // [1.0, 0.5, 0.3333...]\n" +
+                "return e",
+            new Double[] { 1.0d, 0.5d, ((double) 1/3) }
+        );
+
+        check("var a:Int[] = [1, 2, 3]\n" +
+                "    var b:Float[] = [1.0, 2.0, 3.0]\n" +
+                "    \n" +
+                "    // '*' operator\n" +
+                "    var c:Int[] = 5 * a // [5, 10, 15]\n" +
+                "    var f:Float[] = c / 5 // [1.0, 2.0, 3.0]\n" +
+                "return f",
+            new Double[] { 1.0d, 2.0d, 3.0d }
+        );
+
     }
 
     // NOTE(norswap): Not incredibly complete, but should cover the basics.
