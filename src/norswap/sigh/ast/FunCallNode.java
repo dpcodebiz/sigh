@@ -40,6 +40,12 @@ public class FunCallNode extends ExpressionNode
         this.template_arguments = (template_arguments == null) ? new ArrayList<>() : Util.cast(template_arguments, List.class);
         this.templateTypeReferences = new ArrayList<>();
         this.templateArgsMap = new HashMap<>();
+
+        if (this.template_arguments != null) {
+            for (int i = 0; i < this.template_arguments.size(); i++) {
+                this.templateTypeReferences.add(new TemplateTypeReference());
+            }
+        }
     }
 
     public Type getReturnType(Scope scope) {

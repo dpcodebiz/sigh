@@ -399,7 +399,19 @@ public final class InterpreterTests extends TestFixture {
     public void TestTemplateCallErrors() {
         rule = grammar.root;
 
+        // Checking template parameter type not provided
+        checkThrows(
+            "template<A, B> fun add (a: A, b: B): Int { return a + b }; " +
+                "return add<String, String>(1, 1);",
+            AssertionError.class
+        );
 
+        // Checking mismatch template type and argument type
+        checkThrows(
+            "template<A, B> fun add (a: A, b: B): Int { return a + b }; " +
+                "return add<String, String>(1, 1);",
+            AssertionError.class
+        );
 
         // Checking too many template parameter types provided
         checkThrows(
@@ -473,6 +485,14 @@ public final class InterpreterTests extends TestFixture {
                 "fun add (a: A, b: B): B { return a + b };" +
                 "return add<Float, Float>(1.0, 1.0)",
             2.0
+        );
+
+        // Bool
+        check(
+            "template<A, B>" +
+                "fun logic (a: A, b: B): B { return a && b };" +
+                "return logic<Bool, Bool>(true, false)",
+            false
         );
     }
 
